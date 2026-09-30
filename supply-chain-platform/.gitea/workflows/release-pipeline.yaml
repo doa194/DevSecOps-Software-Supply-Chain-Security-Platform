@@ -1,0 +1,38 @@
+# Release pipeline: final trust decision, signing, attestation and promotion.
+#
+# Platform-owned and started only by the Security Control Plane (workflow_dispatch) when a
+# release tag is pushed in an application repository. It runs in the trust zone, which
+# builds and scans nothing: it works only on the images the main pipeline built and the
+# Control Plane approved for this tag.
+#   1. The Control Plane re-evaluates every image (exceptions may have expired since the
+#      main build). A rejected release stops here and nothing is signed.
+#   2. With a single-use signing grant from the Control Plane, every image is copied by
+#      digest into the trusted project, signed with the Vault-held release key, given
+#      signed provenance, trust-decision and SBOM attestations, and verified there.
+#   3. The new digests are committed to the GitOps repository; Argo CD deploys them.
+# The Control Plane records each step and sets the `sscp/release` status on the tagged commit.
+name: release-pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_id: { description: Control Plane release id, required: true }
+      application: { description: Registered application, required: true }
+      repository: { description: Source repository (owner/name), required: true }
+      tag: { description: Release tag, required: true }
+      commit: { description: Tagged commit, required: true }
+
+jobs:
+  release:
+    runs-on: sscp-trust
+    timeout-minutes: 30
+    env:
+      RELEASE_ID: ${{ inputs.release_id }}
+    steps:
+      - name: Final trust decision (Control Plane)
+        run: sscp-ci evaluate-release --release "$RELEASE_ID"
+      - name: Promote, sign and attest every image; commit the digests to GitOps
+        run: sscp-ci publish --release "$RELEASE_ID"
+      - name: Record the failure
+        if: failure()
+        run: sscp-ci fail-release --release "$RELEASE_ID" --reason "release pipeline step failed in run ${{ github.run_id }}"

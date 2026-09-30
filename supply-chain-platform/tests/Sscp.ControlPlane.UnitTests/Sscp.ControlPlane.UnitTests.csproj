@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Fast, exhaustive tests of the trust model: policy evaluation, state machines,
+       exceptions, SLA and evidence readers. No I/O. -->
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Sscp.ControlPlane.Application/Sscp.ControlPlane.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Fixtures/**/*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

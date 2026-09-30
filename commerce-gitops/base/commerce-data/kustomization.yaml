@@ -1,0 +1,9 @@
+# Data services of the commerce workload in the `commerce-data` namespace. Images are the
+# platform's mirrored copies (Harbor `platform-tools`), pinned by digest.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - postgres.yaml
+  - redis.yaml
+  - rabbitmq.yaml
+  - minio.yaml

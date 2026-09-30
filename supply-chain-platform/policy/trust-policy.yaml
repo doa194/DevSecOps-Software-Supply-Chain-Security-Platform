@@ -1,0 +1,108 @@
+# Trust policy of the Security Control Plane.
+#
+# The Control Plane loads this file at start-up and records a hash of it with every trust
+# decision, so each decision names the exact policy text it applied. Changing policy means
+# a reviewed commit to this (platform) repository; application teams cannot change it.
+name: commerce-trust-policy
+
+# Evidence that must exist, from a completed scanner run, before anything can be trusted.
+mandatoryEvidence:
+  # Collected once per commit, about the source tree.
+  commit:
+    - SecretScan
+    - StaticAnalysis
+    - CodeQuality
+    - InfrastructureScan
+    - DockerfileLint
+    - DynamicScan
+    - SecurityTests
+  # Required by the pull-request gate, which scans the proposed source before merge.
+  # Scanners that execute or deploy the code (dynamic scan, security tests) run only on main.
+  pullRequest:
+    - SecretScan
+    - StaticAnalysis
+    - InfrastructureScan
+    - DockerfileLint
+  # Required by the deployment-change gate on GitOps pull requests: no secrets in desired
+  # state, and the rendered Kubernetes manifests pass the infrastructure gate.
+  deploymentChange:
+    - SecretScan
+    - DeploymentConfigScan
+  # Collected for every image digest.
+  artifact:
+    - Sbom
+    - VulnerabilityScan
+    - SecondaryVulnerabilityScan
+
+# Findings at or above the threshold block trust unless an approved exception covers them.
+# Leaked secrets always block and can never be excepted (see exceptions.allowedKinds).
+gates:
+  staticAnalysis:
+    blockAtOrAbove: High
+    exceptionsAllowed: true
+  infrastructure:
+    blockAtOrAbove: High
+    exceptionsAllowed: true
+  dockerfile:
+    blockAtOrAbove: High
+    exceptionsAllowed: true
+  dynamicScan:
+    blockAtOrAbove: High
+    exceptionsAllowed: true
+
+infrastructure:
+  # Checkov's free edition does not grade its checks, so every failed check counts as High
+  # (blocking) unless it is listed here. Each downgrade states why the check does not
+  # apply to this platform; the control it asks for is provided another way.
+  severityOverrides:
+    # The .NET chiseled images run as UID 1654. Non-root is enforced by runAsNonRoot and the
+    # restricted Pod Security Standard; a UID above 10000 adds little on top.
+    CKV_K8S_40: Low
+    # Images are pinned by digest, so re-pulling on every start cannot change what runs.
+    CKV_K8S_15: Low
+    # Chiseled runtime images contain no shell or curl for a Docker HEALTHCHECK; Kubernetes
+    # liveness and readiness probes check health instead.
+    CKV_DOCKER_2: Low
+    # GitOps manifests are scanned without the platform's NetworkPolicies, which are
+    # platform-owned (supply-chain-platform/cluster/platform) and deny all traffic by default.
+    CKV2_K8S_6: Low
+    # CPU requests are set and memory limits are enforced by admission control; CPU limits
+    # are left out on purpose because they throttle bursts without protecting other pods.
+    CKV_K8S_11: Low
+    # Accepted weakness: services read secrets from environment variables (ASP.NET Core
+    # configuration). The values come from External Secrets, pods run one non-root process
+    # with a read-only file system. Mounting secrets as files needs an application change
+    # (see docs/production-considerations.md).
+    CKV_K8S_35: Low
+    # Base images come from build arguments whose values the build zone takes from
+    # versions.yaml, pinned by digest, and the build zone refuses a Dockerfile whose FROM
+    # lines use anything else. Checkov cannot resolve build arguments and reports them as
+    # unpinned.
+    CKV_DOCKER_7: Low
+
+vulnerabilities:
+  # Scanner databases older than this do not count as evidence: an old database cannot
+  # know about recent vulnerabilities.
+  maxDatabaseAgeDays: 7
+  # Remediation windows. A finding inside its window is reported; past it, the action applies.
+  # The age of a finding is measured from the first time any evidence for this application
+  # contained it, so rebuilding does not restart the clock.
+  sla:
+    - { severity: Critical, fixAvailable: true,  remediationDays: 0,   afterWindow: Block }
+    - { severity: Critical, fixAvailable: false, remediationDays: 14,  afterWindow: Block }
+    - { severity: High,     fixAvailable: true,  remediationDays: 7,   afterWindow: Block }
+    - { severity: High,     fixAvailable: false, remediationDays: 30,  afterWindow: Block }
+    - { severity: Medium,                        remediationDays: 30,  afterWindow: Warn }
+    - { severity: Low,                           remediationDays: 180, afterWindow: Track }
+
+exceptions:
+  # Exceptions always expire; there are no permanent suppressions.
+  maxDays: 90
+  minimumJustificationLength: 20
+  # Evidence kinds whose findings may be accepted as risk. SecretScan is deliberately absent.
+  allowedKinds:
+    - VulnerabilityScan
+    - StaticAnalysis
+    - InfrastructureScan
+    - DockerfileLint
+    - DynamicScan

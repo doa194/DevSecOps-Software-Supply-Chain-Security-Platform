@@ -1,0 +1,118 @@
+# commerce-gateway: Deployment, Service.
+# `image` is the logical name; the overlay pins the signed, trusted digest.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: commerce-gateway
+  namespace: commerce
+  labels:
+    app.kubernetes.io/name: commerce-gateway
+    app.kubernetes.io/part-of: commerce
+  annotations:
+    argocd.argoproj.io/sync-wave: '2'
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: commerce-gateway
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: commerce-gateway
+        app.kubernetes.io/part-of: commerce
+    spec:
+      serviceAccountName: commerce-gateway
+      automountServiceAccountToken: false
+      imagePullSecrets:
+      - name: harbor-pull
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1654
+        runAsGroup: 1654
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: commerce-gateway
+        image: commerce-gateway
+        ports:
+        - name: http
+          containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: commerce-config
+        - configMapRef:
+            name: commerce-messaging
+        env:
+        - name: Messaging__Source
+          value: commerce-gateway
+        - name: RELEASE_TAG
+          valueFrom:
+            configMapKeyRef:
+              name: commerce-release
+              key: tag
+        - name: RELEASE_COMMIT
+          valueFrom:
+            configMapKeyRef:
+              name: commerce-release
+              key: commit
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: sscp.release.tag=$(RELEASE_TAG),sscp.release.commit=$(RELEASE_COMMIT),k8s.container.name=commerce-gateway
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 256Mi
+        startupProbe:
+          httpGet:
+            path: /health/live
+            port: http
+          periodSeconds: 3
+          failureThreshold: 40
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: http
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: http
+          periodSeconds: 10
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: sscp-root-ca
+          mountPath: /etc/sscp
+          readOnly: true
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 64Mi
+      - name: sscp-root-ca
+        configMap:
+          name: sscp-root-ca
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: commerce-gateway
+  namespace: commerce
+  labels:
+    app.kubernetes.io/name: commerce-gateway
+    app.kubernetes.io/part-of: commerce
+spec:
+  selector:
+    app.kubernetes.io/name: commerce-gateway
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http

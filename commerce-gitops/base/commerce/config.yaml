@@ -1,0 +1,28 @@
+# Settings shared by every commerce service. Nothing secret belongs here: passwords, keys
+# and connection strings come from Vault through External Secrets (one Secret per service).
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: commerce-config
+  namespace: commerce
+  labels:
+    app.kubernetes.io/part-of: commerce
+data:
+  ASPNETCORE_ENVIRONMENT: Production
+  # Tokens are issued by the platform Keycloak's `commerce` realm; the local CA is mounted
+  # from the `sscp-root-ca` ConfigMap.
+  Identity__Issuer: https://keycloak.sscp.test:9443/realms/commerce
+  Identity__CaCertificatePath: /etc/sscp/ca.crt
+  Identity__Admin__BaseUrl: https://keycloak.sscp.test:9443
+  Identity__Admin__CaCertificatePath: /etc/sscp/ca.crt
+  ObjectStorage__Endpoint: http://minio.commerce-data.svc.cluster.local:9000
+  # Traces, metrics and logs go to the platform's OpenTelemetry Collector over OTLP/HTTP;
+  # the `to-telemetry` network policy opens exactly this path.
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.observability.svc.cluster.local:4318
+  OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+  # The gateway forwards to the services by their in-cluster names.
+  ReverseProxy__Clusters__api__Destinations__primary__Address: http://commerce-api.commerce.svc.cluster.local:8080
+  ReverseProxy__Clusters__audit-worker__Destinations__primary__Address: http://audit-worker.commerce.svc.cluster.local:8080
+  ReverseProxy__Clusters__reporting-worker__Destinations__primary__Address: http://reporting-worker.commerce.svc.cluster.local:8080
+  ReverseProxy__Clusters__notification-worker__Destinations__primary__Address: http://notification-worker.commerce.svc.cluster.local:8080

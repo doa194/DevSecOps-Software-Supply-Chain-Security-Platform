@@ -1,0 +1,70 @@
+# How application pods must run. The namespaces also enforce the Pod Security Standard
+# `restricted`; this policy adds the platform's stricter rules and names each one in its
+# error message:
+#   - no host namespaces, host paths or host ports,
+#   - non-root, no privilege escalation, no privileged mode, all capabilities dropped,
+#   - a read-only root file system (writable paths are explicit emptyDir volumes),
+#   - the runtime's default seccomp profile,
+#   - no service account token in the pod and never the default or `vault-secrets` account.
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: workload-security
+  annotations:
+    policies.kyverno.io/title: Hardened application pods
+spec:
+  failurePolicy: Fail
+  validationActions: [Deny]
+  autogen:
+    podControllers:
+      controllers: [deployments, statefulsets, jobs]
+  matchConstraints:
+    namespaceSelector:
+      matchExpressions:
+        - { key: kubernetes.io/metadata.name, operator: In, values: [commerce, commerce-data] }
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods]
+  variables:
+    - name: containers
+      expression: 'object.spec.containers + (has(object.spec.initContainers) ? object.spec.initContainers : [])'
+    - name: podContext
+      expression: 'has(object.spec.securityContext) ? object.spec.securityContext : {}'
+  validations:
+    - expression: >-
+        !(has(object.spec.hostNetwork) && object.spec.hostNetwork)
+        && !(has(object.spec.hostPID) && object.spec.hostPID)
+        && !(has(object.spec.hostIPC) && object.spec.hostIPC)
+      message: host network, PID and IPC namespaces are not allowed
+    - expression: '!has(object.spec.volumes) || object.spec.volumes.all(v, !has(v.hostPath))'
+      message: hostPath volumes are not allowed
+    - expression: variables.containers.all(c, !has(c.ports) || c.ports.all(p, !has(p.hostPort) || p.hostPort == 0))
+      message: host ports are not allowed
+    - expression: >-
+        variables.containers.all(c,
+          (has(c.securityContext) && has(c.securityContext.runAsNonRoot) && c.securityContext.runAsNonRoot)
+          || (has(variables.podContext.runAsNonRoot) && variables.podContext.runAsNonRoot))
+      message: containers must run as non-root (runAsNonRoot)
+    - expression: >-
+        variables.containers.all(c, has(c.securityContext)
+          && has(c.securityContext.allowPrivilegeEscalation) && c.securityContext.allowPrivilegeEscalation == false
+          && !(has(c.securityContext.privileged) && c.securityContext.privileged))
+      message: containers must set allowPrivilegeEscalation=false and must not be privileged
+    - expression: >-
+        variables.containers.all(c, has(c.securityContext) && has(c.securityContext.capabilities)
+          && has(c.securityContext.capabilities.drop) && "ALL" in c.securityContext.capabilities.drop
+          && (!has(c.securityContext.capabilities.add) || size(c.securityContext.capabilities.add) == 0))
+      message: containers must drop all Linux capabilities and add none
+    - expression: >-
+        variables.containers.all(c, has(c.securityContext)
+          && has(c.securityContext.readOnlyRootFilesystem) && c.securityContext.readOnlyRootFilesystem)
+      message: containers must use a read-only root file system
+    - expression: has(variables.podContext.seccompProfile) && variables.podContext.seccompProfile.type == "RuntimeDefault"
+      message: pods must use the RuntimeDefault seccomp profile
+    - expression: has(object.spec.automountServiceAccountToken) && object.spec.automountServiceAccountToken == false
+      message: pods must not mount a service account token (automountServiceAccountToken=false)
+    - expression: >-
+        has(object.spec.serviceAccountName) && !(object.spec.serviceAccountName in ["default", "vault-secrets"])
+      message: pods must run as their own service account, never `default` or `vault-secrets`

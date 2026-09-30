@@ -1,0 +1,117 @@
+# OpenTelemetry Collector: the one place workload telemetry enters the observability stack.
+#
+#   commerce services --OTLP--> collector --metrics--> Prometheus (scrapes :8889)
+#                                         --logs-----> Loki (OTLP)
+#                                         --traces---> request metrics per service and route
+#   Kubernetes events (watch) ---------------> Loki   (admission refusals, failed pulls, ...)
+#
+# The collector adds Kubernetes metadata to every signal from the sending pod: namespace,
+# pod, deployment and the running image's digest. Together with the release tag the pods
+# report themselves, runtime telemetry can be matched to the release and to the Control
+# Plane's records for that digest. There is no trace store: traces are turned into
+# request-rate, error and duration metrics and then dropped.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: otel-collector
+  namespace: observability
+---
+# Read-only access for the metadata processor and the events receiver.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: sscp-otel-collector
+rules:
+  - apiGroups: [""]
+    resources: [pods, namespaces, events]
+    verbs: [get, list, watch]
+  - apiGroups: [apps]
+    resources: [replicasets]
+    verbs: [get, list, watch]
+  - apiGroups: [events.k8s.io]
+    resources: [events]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: sscp-otel-collector
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: sscp-otel-collector
+subjects:
+  - kind: ServiceAccount
+    name: otel-collector
+    namespace: observability
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: otel-collector
+    app.kubernetes.io/part-of: observability
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: otel-collector
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: otel-collector
+        app.kubernetes.io/part-of: observability
+    spec:
+      serviceAccountName: otel-collector
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: otel-collector
+          image: harbor.sscp.test:8443/platform-tools/otel-collector@sha256:b5cf983651c32c3ca13f936deb51742015a54d121f388cac248923ddeb8cc9fc
+          args: ["--config=/etc/otelcol/config.yaml"]
+          env:
+            # Lets the Go runtime collect garbage before the memory limiter has to step in.
+            - { name: GOMEMLIMIT, value: 400MiB }
+          ports:
+            - { name: otlp-grpc, containerPort: 4317 }
+            - { name: otlp-http, containerPort: 4318 }
+            - { name: metrics, containerPort: 8889 }
+            - { name: health, containerPort: 13133 }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { memory: 512Mi }
+          readinessProbe:
+            httpGet: { path: /, port: health }
+          livenessProbe:
+            httpGet: { path: /, port: health }
+            periodSeconds: 30
+          volumeMounts:
+            - { name: config, mountPath: /etc/otelcol, readOnly: true }
+      volumes:
+        - name: config
+          configMap:
+            name: otel-collector
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: otel-collector
+spec:
+  selector:
+    app.kubernetes.io/name: otel-collector
+  ports:
+    - { name: otlp-grpc, port: 4317, targetPort: otlp-grpc }
+    - { name: otlp-http, port: 4318, targetPort: otlp-http }
+    - { name: metrics, port: 8889, targetPort: metrics }

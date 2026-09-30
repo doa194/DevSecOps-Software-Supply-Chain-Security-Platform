@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Fast tests of domain rules and security policies. No database, broker or network. -->
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Hosts/Commerce.Api/Commerce.Api.csproj" />
+    <ProjectReference Include="../../src/Workers/Commerce.Workers.Audit/Commerce.Workers.Audit.csproj" />
+    <ProjectReference Include="../../src/Workers/Commerce.Workers.Documents/Commerce.Workers.Documents.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../../config/publishers.yaml" Link="publishers.yaml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,10 @@
+# Only source, policy and build settings go into the Control Plane image build.
+**/bin/
+**/obj/
+**/TestResults/
+.venv/
+.pytest_cache/
+automation/
+tests/
+platform/
+.git/

@@ -1,0 +1,36 @@
+# Which service may publish which integration events (mirrors commerce-app/config/publishers.yaml).
+# The publishers' public keys are installation-specific and arrive with each service's secret.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: commerce-messaging
+  namespace: commerce
+  labels:
+    app.kubernetes.io/part-of: commerce
+data:
+  Messaging__TrustedPublishers__commerce-api-key__Source: commerce-api
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__0: identity.user-provisioned.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__1: identity.user-roles-changed.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__2: customers.customer-registered.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__3: catalog.product-created.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__4: catalog.product-price-changed.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__5: catalog.product-retired.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__6: inventory.stock-reserved.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__7: inventory.stock-reservation-failed.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__8: inventory.stock-level-changed.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__9: orders.order-placed.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__10: orders.order-awaiting-payment.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__11: orders.order-confirmed.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__12: orders.order-rejected.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__13: orders.order-cancelled.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__14: orders.order-fulfilled.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__15: payments.payment-captured.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__16: payments.payment-failed.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__17: payments.payment-refunded.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__18: documents.generation-requested.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__19: administration.feature-flag-changed.v1
+  Messaging__TrustedPublishers__commerce-api-key__AllowedTypes__20: audit.recorded.v1
+  Messaging__TrustedPublishers__document-worker-key__Source: document-worker
+  Messaging__TrustedPublishers__document-worker-key__AllowedTypes__0: documents.document-generated.v1
+  Messaging__TrustedPublishers__document-worker-key__AllowedTypes__1: documents.generation-failed.v1

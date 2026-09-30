@@ -1,0 +1,47 @@
+# Deployment-security pipeline for pull requests on a GitOps repository.
+#
+# Platform-owned and started only by the Security Control Plane (workflow_dispatch) when a
+# pull request against main is opened or updated in an application's GitOps repository.
+# It runs in the security zone on exactly the pull request's head commit: Gitleaks looks
+# for secrets in desired state, and Checkov renders every environment overlay with
+# Kustomize and checks the Kubernetes objects that would be applied. The Control Plane
+# decides and sets the required `sscp/deployment-security` status on the pull request.
+# Admission control in the cluster still checks everything again when Argo CD applies it.
+name: deployment-pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_id: { description: Control Plane build id, required: true }
+      application: { description: Registered application, required: true }
+      repository: { description: GitOps repository (owner/name), required: true }
+      commit: { description: Pull request head commit, required: true }
+      pull_request: { description: Pull request number, required: true }
+
+jobs:
+  deployment-security:
+    runs-on: sscp-security
+    timeout-minutes: 20
+    env:
+      BUILD_ID: ${{ inputs.build_id }}
+      REPOSITORY: ${{ inputs.repository }}
+      COMMIT: ${{ inputs.commit }}
+    steps:
+      - name: Fetch the pull request commit
+        run: sscp-ci fetch-source --repository "$REPOSITORY" --commit "$COMMIT" --dest src
+
+      - name: Secrets (Gitleaks)
+        run: sscp-ci scan secrets --build "$BUILD_ID" --commit "$COMMIT"
+
+      - name: Rendered manifests (Checkov with Kustomize)
+        run: sscp-ci scan deployment --build "$BUILD_ID" --commit "$COMMIT"
+
+      - name: Deployment security decision (Control Plane)
+        id: decision
+        run: sscp-ci evaluate-source --build "$BUILD_ID"
+
+      # The build succeeded when the decision could be made, whatever the decision was: a
+      # FAIL keeps its own reason in the commit status instead of "pipeline failed".
+      - name: Mark the build finished
+        if: always()
+        run: sscp-ci complete --build "$BUILD_ID" --status "${{ (steps.decision.outcome == 'success' || steps.decision.outcome == 'failure') && 'success' || 'failure' }}"

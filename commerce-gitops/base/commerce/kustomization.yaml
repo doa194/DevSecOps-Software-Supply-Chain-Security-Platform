@@ -1,0 +1,15 @@
+# The commerce services in the `commerce` namespace. Namespaces, service accounts, network
+# policies and admission policies are platform-owned and come from the platform repository.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - config.yaml
+  - messaging.yaml
+  - registry-access.yaml
+  - migrations.yaml
+  - commerce-api.yaml
+  - commerce-gateway.yaml
+  - audit-worker.yaml
+  - reporting-worker.yaml
+  - notification-worker.yaml
+  - document-worker.yaml

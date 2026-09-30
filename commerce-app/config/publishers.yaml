@@ -1,0 +1,38 @@
+# Which service may publish which integration events.
+#
+# Every publisher signs its messages with its own key. Consumers accept a message only if
+# it is signed by a key listed here AND the event type is in that publisher's list. The
+# document worker can therefore never forge, for example, a payment confirmation, even
+# though it can reach the broker.
+#
+# Used by the local development automation and mirrored in the GitOps repository's
+# messaging configuration for the cluster. A unit test checks that every contract event
+# has exactly one publisher here.
+publishers:
+  commerce-api:
+    events:
+      - identity.user-provisioned.v1
+      - identity.user-roles-changed.v1
+      - customers.customer-registered.v1
+      - catalog.product-created.v1
+      - catalog.product-price-changed.v1
+      - catalog.product-retired.v1
+      - inventory.stock-reserved.v1
+      - inventory.stock-reservation-failed.v1
+      - inventory.stock-level-changed.v1
+      - orders.order-placed.v1
+      - orders.order-awaiting-payment.v1
+      - orders.order-confirmed.v1
+      - orders.order-rejected.v1
+      - orders.order-cancelled.v1
+      - orders.order-fulfilled.v1
+      - payments.payment-captured.v1
+      - payments.payment-failed.v1
+      - payments.payment-refunded.v1
+      - documents.generation-requested.v1
+      - administration.feature-flag-changed.v1
+      - audit.recorded.v1
+  document-worker:
+    events:
+      - documents.document-generated.v1
+      - documents.generation-failed.v1

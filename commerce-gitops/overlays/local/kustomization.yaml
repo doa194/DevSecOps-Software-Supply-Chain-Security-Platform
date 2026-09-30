@@ -1,0 +1,10 @@
+# Written by the release pipeline (trust zone). Digests only; see docs/gitops-and-admission.md.
+# The `local` environment: the kind cluster on this workstation. Until the first release,
+# `images` is empty and admission control refuses the unpinned placeholder images.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../base/commerce-data
+- ../../base/commerce
+- release.yaml
+images: []

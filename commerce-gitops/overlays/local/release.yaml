@@ -1,0 +1,13 @@
+# Written by the release pipeline (trust zone). Digests only; see docs/gitops-and-admission.md.
+# Which release this environment runs; informational, for people reading the cluster.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: commerce-release
+  namespace: commerce
+  labels:
+    app.kubernetes.io/part-of: commerce
+data:
+  tag: none
+  commit: none
+  release: none

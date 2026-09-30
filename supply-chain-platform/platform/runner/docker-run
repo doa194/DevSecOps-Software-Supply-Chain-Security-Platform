@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Replaces the gitea/runner image's start script for its nested Docker daemon
+# (/etc/s6/docker/run). The runner itself starts only once this service reports ready.
+#
+# The image checks readiness at most 7 times, one second apart. After a host restart on a
+# slow disk the nested daemon can need half a minute, readiness is then never reported and
+# the runner never starts. Here the check keeps polling for up to five minutes instead.
+exec s6-notifyoncheck -n 0 -T 300000 dockerd-entrypoint.sh

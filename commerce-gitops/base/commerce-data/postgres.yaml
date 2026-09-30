@@ -1,0 +1,128 @@
+# PostgreSQL for the commerce workload. On first start it runs `init.sql` from its Vault
+# secret, which creates the schema-owner role and one runtime role per module and worker.
+# The image is the platform's mirrored copy, pinned by digest.
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: postgres
+  namespace: commerce-data
+  labels:
+    app.kubernetes.io/part-of: commerce
+spec:
+  refreshInterval: 5m
+  secretStoreRef:
+    kind: SecretStore
+    name: vault
+  target:
+    name: postgres
+    creationPolicy: Owner
+  dataFrom:
+    - extract:
+        key: workload/commerce-data/postgres
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: commerce-data
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: commerce
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgres
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: postgres
+        app.kubernetes.io/part-of: commerce
+    spec:
+      serviceAccountName: postgres
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: postgres
+          image: harbor.sscp.test:8443/platform-tools/postgres@sha256:0377e72c5289ed2f98cf61b1a9c2db9eb9d300317fe14244492fbc94343b3d04
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: commerce
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: POSTGRES_PASSWORD
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { memory: 384Mi }
+          readinessProbe:
+            exec:
+              command: [pg_isready, -U, postgres, -d, commerce]
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: [pg_isready, -U, postgres, -d, commerce]
+            periodSeconds: 20
+            initialDelaySeconds: 30
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql
+            - name: run
+              mountPath: /var/run/postgresql
+            - name: tmp
+              mountPath: /tmp
+            - name: init
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+      volumes:
+        - name: run
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: init
+          secret:
+            secretName: postgres
+            items:
+              - key: init.sql
+                path: init.sql
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: commerce-data
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: commerce
+spec:
+  selector:
+    app.kubernetes.io/name: postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres

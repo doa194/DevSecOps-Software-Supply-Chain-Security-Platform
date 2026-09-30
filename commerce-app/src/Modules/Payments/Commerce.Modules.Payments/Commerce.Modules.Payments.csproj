@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../../../BuildingBlocks/Commerce.SharedKernel/Commerce.SharedKernel.csproj" />
+    <ProjectReference Include="../../../BuildingBlocks/Commerce.BuildingBlocks/Commerce.BuildingBlocks.csproj" />
+    <ProjectReference Include="../Commerce.Modules.Payments.Contracts/Commerce.Modules.Payments.Contracts.csproj" />
+    <ProjectReference Include="../../Orders/Commerce.Modules.Orders.Contracts/Commerce.Modules.Orders.Contracts.csproj" />
+    <ProjectReference Include="../../Administration/Commerce.Modules.Administration.Contracts/Commerce.Modules.Administration.Contracts.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,21 @@
+# The only way into the workload from outside the cluster: the commerce gateway on
+# NodePort 30080, which kind publishes on 127.0.0.1:8088 of this workstation. It is
+# platform-owned; the `restrict-service-exposure` policy refuses any other NodePort or
+# LoadBalancer Service in the application namespaces.
+apiVersion: v1
+kind: Service
+metadata:
+  name: commerce-gateway-external
+  namespace: commerce
+  labels:
+    app.kubernetes.io/name: commerce-gateway
+    app.kubernetes.io/part-of: commerce
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: commerce-gateway
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      nodePort: 30080

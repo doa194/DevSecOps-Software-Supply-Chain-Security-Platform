@@ -1,0 +1,61 @@
+# Harbor configuration template. `sscp` fills in the placeholder values from the local
+# credential store, runs Harbor's own `prepare` generator on the result and adapts the
+# generated Compose file (see automation/src/sscp/services/harbor.py).
+hostname: harbor.sscp.test
+
+http:
+  port: 8080
+
+https:
+  port: 8443
+  # Resolved by the generator under /hostfs, where the local PKI directory is mounted.
+  certificate: /pki/harbor/fullchain.crt
+  private_key: /pki/harbor/tls.key
+  strong_ssl_ciphers: true
+
+harbor_admin_password: ${HARBOR_ADMIN_PASSWORD}
+
+database:
+  password: ${HARBOR_DB_PASSWORD}
+  max_idle_conns: 20
+  max_open_conns: 50
+  conn_max_idle_time: 0
+
+# Placeholder path; the adapted Compose file replaces it with named volumes and
+# generated secret files.
+data_volume: /harbor-data
+
+jobservice:
+  max_job_workers: 2
+  job_loggers:
+    - STD_OUTPUT
+  logger_sweeper_duration: 1
+
+notification:
+  webhook_job_max_retry: 3
+  webhook_job_http_client_timeout: 3
+
+log:
+  level: info
+  local:
+    rotate_count: 5
+    rotate_size: 50M
+    location: /var/log/harbor
+
+upload_purging:
+  enabled: true
+  age: 168h
+  interval: 24h
+  dryrun: false
+
+cache:
+  enabled: false
+  expire_hours: 24
+
+# Exposes Harbor's Prometheus metrics for the observability stack.
+metric:
+  enabled: true
+  port: 9090
+  path: /metrics
+
+_version: 2.15.0

@@ -1,0 +1,51 @@
+{
+  "realm": "commerce-test",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      { "name": "customer" },
+      { "name": "finance" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "commerce-cli",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": false,
+      "protocolMappers": [
+        {
+          "name": "commerce-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": { "included.client.audience": "commerce-api", "access.token.claim": "true", "id.token.claim": "false" }
+        }
+      ]
+    },
+    {
+      "clientId": "other-cli",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": false
+    },
+    {
+      "clientId": "commerce-api",
+      "enabled": true,
+      "bearerOnly": true
+    }
+  ],
+  "users": [
+    {
+      "username": "fiona",
+      "enabled": true,
+      "email": "fiona@commerce-test.test",
+      "emailVerified": true,
+      "firstName": "Fiona",
+      "lastName": "Finance",
+      "credentials": [ { "type": "password", "value": "integration-test-only", "temporary": false } ],
+      "realmRoles": [ "finance" ]
+    }
+  ]
+}

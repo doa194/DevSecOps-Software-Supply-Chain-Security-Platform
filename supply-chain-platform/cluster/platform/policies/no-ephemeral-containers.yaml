@@ -1,0 +1,34 @@
+# No debug containers in the application namespaces.
+#
+# `kubectl debug` adds an ephemeral container to a running pod through the
+# pods/ephemeralcontainers subresource. Such a container could run any image next to the
+# workload, so none are allowed here. This is a native Kubernetes admission policy,
+# enforced by the API server itself: Kyverno's CEL policies are not called for this
+# subresource. Diagnose through logs, metrics and the workload's health endpoints instead.
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: no-ephemeral-containers
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    namespaceSelector:
+      matchExpressions:
+        - { key: kubernetes.io/metadata.name, operator: In, values: [commerce, commerce-data] }
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [UPDATE]
+        resources: [pods/ephemeralcontainers]
+  validations:
+    - expression: '!has(object.spec.ephemeralContainers) || size(object.spec.ephemeralContainers) == 0'
+      message: ephemeral (debug) containers are not allowed in application namespaces
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: no-ephemeral-containers
+spec:
+  policyName: no-ephemeral-containers
+  validationActions: [Deny]

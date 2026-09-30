@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Sscp.ControlPlane.Api/Sscp.ControlPlane.Api.csproj" />
+    <Project Path="src/Sscp.ControlPlane.Application/Sscp.ControlPlane.Application.csproj" />
+    <Project Path="src/Sscp.ControlPlane.Domain/Sscp.ControlPlane.Domain.csproj" />
+    <Project Path="src/Sscp.ControlPlane.Infrastructure/Sscp.ControlPlane.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Sscp.ControlPlane.ArchitectureTests/Sscp.ControlPlane.ArchitectureTests.csproj" />
+    <Project Path="tests/Sscp.ControlPlane.ComponentTests/Sscp.ControlPlane.ComponentTests.csproj" />
+    <Project Path="tests/Sscp.ControlPlane.IntegrationTests/Sscp.ControlPlane.IntegrationTests.csproj" />
+    <Project Path="tests/Sscp.ControlPlane.UnitTests/Sscp.ControlPlane.UnitTests.csproj" />
+  </Folder>
+</Solution>

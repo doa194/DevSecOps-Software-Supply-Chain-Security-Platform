@@ -1,0 +1,96 @@
+# Argo CD: the only path from Git to the cluster.
+#
+# Two projects are defined in cluster/platform/argocd: `platform` (cluster security
+# configuration from the platform repository) and `commerce` (the workload from the
+# GitOps repository, namespaced resources in two namespaces only). The bootstrap adds the
+# platform CA for Gitea (`configs.tls.certificates`) and mounts it for notifications.
+dex:
+  enabled: false
+applicationSet:
+  replicas: 0
+configs:
+  cm:
+    # Poll Git every minute; there is no inbound webhook from Gitea into the cluster.
+    timeout.reconciliation: 60s
+    # Kyverno reports and ESO-managed Secrets are not part of desired state.
+    resource.exclusions: |
+      - apiGroups: ["wgpolicyk8s.io", "reports.kyverno.io", "openreports.io"]
+        kinds: ["*"]
+        clusters: ["*"]
+  params:
+    server.insecure: false
+  rbac:
+    # Signed-in users can look but not change; changes go through Git.
+    policy.default: role:readonly
+server:
+  service:
+    type: NodePort
+    nodePortHttps: 30444
+    # Not published by kind; moved off the chart default, which is the gateway's port.
+    nodePortHttp: 30081
+  resources:
+    requests: { cpu: 20m, memory: 64Mi }
+    limits: { memory: 256Mi }
+controller:
+  # Application sync and health state for Prometheus (argocd_app_info and friends).
+  metrics:
+    enabled: true
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { memory: 768Mi }
+repoServer:
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { memory: 384Mi }
+  # The chart allows one second per health check. While pipelines keep the workstation's
+  # disk busy the full check takes longer, and the kubelet kept restarting a healthy
+  # server; Argo CD then cannot render any application until it is back.
+  livenessProbe: { timeoutSeconds: 5, failureThreshold: 6 }
+  readinessProbe: { timeoutSeconds: 5 }
+redis:
+  resources:
+    requests: { cpu: 10m, memory: 32Mi }
+    limits: { memory: 128Mi }
+notifications:
+  # The webhook secret is delivered from Vault by External Secrets, not by Helm.
+  secret:
+    create: false
+  resources:
+    requests: { cpu: 10m, memory: 32Mi }
+    limits: { memory: 128Mi }
+  # Trust the platform CA when calling the Control Plane.
+  extraEnv:
+    - name: SSL_CERT_DIR
+      value: /etc/ssl/certs:/etc/sscp
+  extraVolumes:
+    - name: sscp-root-ca
+      configMap:
+        name: sscp-root-ca
+  extraVolumeMounts:
+    - name: sscp-root-ca
+      mountPath: /etc/sscp
+      readOnly: true
+  notifiers:
+    service.webhook.controlplane: |
+      url: https://controlplane.sscp.test:8443
+      headers:
+        - name: Authorization
+          value: Bearer $controlplane-token
+        - name: Content-Type
+          value: application/json
+  templates:
+    # Tells the Control Plane which Git revision is running and with which images, so it
+    # can mark the matching release deployed.
+    template.controlplane-deployment: |
+      webhook:
+        controlplane:
+          method: POST
+          path: /api/deployments/argocd
+          body: |
+            {"application": "{{.app.metadata.name}}", "revision": "{{.app.status.sync.revision}}", "syncStatus": "{{.app.status.sync.status}}", "health": "{{.app.status.health.status}}", "images": {{toJson .app.status.summary.images}}}
+  triggers:
+    trigger.on-deployed: |
+      - description: The application is synced to a new revision and healthy
+        oncePer: app.status.operationState?.syncResult?.revision
+        send: [controlplane-deployment]
+        when: app.status.operationState != nil and app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy' and app.status.sync.status == 'Synced'

@@ -1,0 +1,24 @@
+# Applications whose artifacts the Security Control Plane governs.
+#
+# The deployable list here is authoritative: the build zone builds exactly these (each from
+# the Dockerfile target of the same name), and a release needs an artifact with full
+# evidence for every one. Candidate and trusted repositories are separate Harbor projects;
+# only the trust zone can push to the trusted one.
+applications:
+  - name: commerce
+    sourceRepository: commerce/commerce-app
+    deployables:
+      - commerce-api
+      - commerce-gateway
+      - notification-worker
+      - audit-worker
+      - document-worker
+      - reporting-worker
+    candidateRepository: harbor.sscp.test:8443/commerce-candidates
+    trustedRepository: harbor.sscp.test:8443/commerce-trusted
+    # Desired cluster state: the release pipeline pins digests in this Kustomize directory,
+    # and the Control Plane checks them there before it records a deployment.
+    gitOps:
+      repository: platform/commerce-gitops
+      path: overlays/local
+      environment: local

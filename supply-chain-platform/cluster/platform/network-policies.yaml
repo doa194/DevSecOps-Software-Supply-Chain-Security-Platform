@@ -1,0 +1,208 @@
+# East-west traffic rules for the application namespaces.
+#
+# Everything is denied in both directions, then only the paths the architecture needs are
+# opened, each for the services that need it:
+#
+#   outside ──▶ commerce-gateway ──▶ commerce-api, audit/reporting/notification workers
+#   commerce-api ──▶ postgres, redis, rabbitmq, minio
+#   audit, reporting, notification workers ──▶ postgres, rabbitmq
+#   document-worker ──▶ postgres, rabbitmq, minio
+#   commerce-migrations ──▶ postgres, minio (schemas and the documents bucket)
+#   HTTP services ──▶ Keycloak (172.30.0.13:9443, token signing keys and admin API)
+#   every commerce service ──▶ OpenTelemetry Collector (observability, OTLP over HTTP)
+#   every pod ──▶ cluster DNS
+#
+# Anything else, for example the gateway talking to PostgreSQL or a worker calling another
+# worker, is refused by the network.
+---
+apiVersion: v1
+kind: List
+items:
+  # ---------------------------------------------------------------- commerce
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata: { name: default-deny, namespace: commerce }
+    spec:
+      podSelector: {}
+      policyTypes: [Ingress, Egress]
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata: { name: allow-dns, namespace: commerce }
+    spec:
+      podSelector: {}
+      policyTypes: [Egress]
+      egress:
+        - to:
+            - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: kube-system } }
+              podSelector: { matchLabels: { k8s-app: kube-dns } }
+          ports: [{ protocol: UDP, port: 53 }, { protocol: TCP, port: 53 }]
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata: { name: gateway, namespace: commerce }
+    spec:
+      podSelector: { matchLabels: { app.kubernetes.io/name: commerce-gateway } }
+      policyTypes: [Ingress, Egress]
+      # The public entry point: accepts connections from anywhere on its HTTP port.
+      ingress:
+        - ports: [{ protocol: TCP, port: 8080 }]
+      egress:
+        - to:
+            - podSelector:
+                matchExpressions:
+                  - { key: app.kubernetes.io/name, operator: In, values: [commerce-api, audit-worker, reporting-worker, notification-worker] }
+          ports: [{ protocol: TCP, port: 8080 }]
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata: { name: from-gateway, namespace: commerce }
+    spec:
+      podSelector:
+        matchExpressions:
+          - { key: app.kubernetes.io/name, operator: In, values: [commerce-api, audit-worker, reporting-worker, notification-worker] }
+      policyTypes: [Ingress]
+      ingress:
+        - from:
+            - podSelector: { matchLabels: { app.kubernetes.io/name: commerce-gateway } }
+          ports: [{ protocol: TCP, port: 8080 }]
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata: { name: to-keycloak, namespace: commerce }
+    spec:
+      podSelector:
+        matchExpressions:
+          - { key: app.kubernetes.io/name, operator: In, values: [commerce-gateway, commerce-api, audit-worker, reporting-worker, notification-worker] }
+      policyTypes: [Egress]
+      egress:
+        - to: [{ ipBlock: { cidr: 172.30.0.13/32 } }]
+          ports: [{ protocol: TCP, port: 9443 }]
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata: { name: to-telemetry, namespace: commerce }
+    spec:
+      podSelector:
+        matchExpressions:
+          - { key: app.kubernetes.io/name, operator: In, values: [commerce-gateway, commerce-api, audit-worker, reporting-worker, notification-worker, document-worker] }
+      policyTypes: [Egress]
+      egress:
+        - to:
+            - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: observability } }
+              podSelector: { matchLabels: { app.kubernetes.io/name: otel-collector } }
+          ports: [{ protocol: TCP, port: 4318 }]
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata: { name: to-postgres, namespace: commerce }
+    spec:
+      podSelector:
+        matchExpressions:
+          - { key: app.kubernetes.io/name, operator: In, values: [commerce-api, audit-worker, reporting-worker, notification-worker, document-worker, commerce-migrations] }
+      policyTypes: [Egress]
+      egress:
+        - to:
+            - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: commerce-data } }
+              podSelector: { matchLabels: { app.kubernetes.io/name: postgres } }
+          ports: [{ protocol: TCP, port: 5432 }]
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata: { name: to-rabbitmq, namespace: commerce }
+    spec:
+      podSelector:
+        matchExpressions:
+          - { key: app.kubernetes.io/name, operator: In, values: [commerce-api, audit-worker, reporting-worker, notification-worker, document-worker] }
+      policyTypes: [Egress]
+      egress:
+        - to:
+            - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: commerce-data } }
+              podSelector: { matchLabels: { app.kubernetes.io/name: rabbitmq } }
+          ports: [{ protocol: TCP, port: 5672 }]
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata: { name: to-redis, namespace: commerce }
+    spec:
+      podSelector: { matchLabels: { app.kubernetes.io/name: commerce-api } }
+      policyTypes: [Egress]
+      egress:
+        - to:
+            - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: commerce-data } }
+              podSelector: { matchLabels: { app.kubernetes.io/name: redis } }
+          ports: [{ protocol: TCP, port: 6379 }]
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata: { name: to-minio, namespace: commerce }
+    spec:
+      podSelector:
+        matchExpressions:
+          - { key: app.kubernetes.io/name, operator: In, values: [commerce-api, document-worker, commerce-migrations] }
+      policyTypes: [Egress]
+      egress:
+        - to:
+            - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: commerce-data } }
+              podSelector: { matchLabels: { app.kubernetes.io/name: minio } }
+          ports: [{ protocol: TCP, port: 9000 }]
+
+  # ---------------------------------------------------------------- commerce-data
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata: { name: default-deny, namespace: commerce-data }
+    spec:
+      podSelector: {}
+      policyTypes: [Ingress, Egress]
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata: { name: allow-dns, namespace: commerce-data }
+    spec:
+      podSelector: {}
+      policyTypes: [Egress]
+      egress:
+        - to:
+            - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: kube-system } }
+              podSelector: { matchLabels: { k8s-app: kube-dns } }
+          ports: [{ protocol: UDP, port: 53 }, { protocol: TCP, port: 53 }]
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata: { name: postgres, namespace: commerce-data }
+    spec:
+      podSelector: { matchLabels: { app.kubernetes.io/name: postgres } }
+      policyTypes: [Ingress]
+      ingress:
+        - from:
+            - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: commerce } }
+              podSelector:
+                matchExpressions:
+                  - { key: app.kubernetes.io/name, operator: In, values: [commerce-api, audit-worker, reporting-worker, notification-worker, document-worker, commerce-migrations] }
+          ports: [{ protocol: TCP, port: 5432 }]
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata: { name: rabbitmq, namespace: commerce-data }
+    spec:
+      podSelector: { matchLabels: { app.kubernetes.io/name: rabbitmq } }
+      policyTypes: [Ingress]
+      ingress:
+        - from:
+            - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: commerce } }
+              podSelector:
+                matchExpressions:
+                  - { key: app.kubernetes.io/name, operator: In, values: [commerce-api, audit-worker, reporting-worker, notification-worker, document-worker] }
+          ports: [{ protocol: TCP, port: 5672 }]
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata: { name: redis, namespace: commerce-data }
+    spec:
+      podSelector: { matchLabels: { app.kubernetes.io/name: redis } }
+      policyTypes: [Ingress]
+      ingress:
+        - from:
+            - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: commerce } }
+              podSelector: { matchLabels: { app.kubernetes.io/name: commerce-api } }
+          ports: [{ protocol: TCP, port: 6379 }]
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata: { name: minio, namespace: commerce-data }
+    spec:
+      podSelector: { matchLabels: { app.kubernetes.io/name: minio } }
+      policyTypes: [Ingress]
+      ingress:
+        - from:
+            - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: commerce } }
+              podSelector:
+                matchExpressions:
+                  - { key: app.kubernetes.io/name, operator: In, values: [commerce-api, document-worker, commerce-migrations] }
+          ports: [{ protocol: TCP, port: 9000 }]

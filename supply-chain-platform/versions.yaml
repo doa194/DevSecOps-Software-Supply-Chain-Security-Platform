@@ -1,0 +1,129 @@
+# Single source of truth for every pinned version used by the platform.
+#
+# Why this file exists: build tools, scanners and platform services are supply-chain
+# dependencies too. Pinning them in one place (by digest where practical) means an
+# upstream tag being moved or replaced cannot silently change what the platform runs.
+# The automation reads this file and passes the values to Docker Compose, kind, Helm
+# and the CI runner configuration, so no other file hard-codes its own version.
+#
+# Updating a version: change it here, run `sscp verify` and the affected test suites.
+schemaVersion: 1
+
+tools:
+  # kind is downloaded into .tools/bin by `sscp up --with cluster` on first use and is
+  # accepted only if it matches the SHA-256 recorded here. The other entries are the
+  # versions `sscp doctor` expects on the workstation or bakes into CI images.
+  kind:
+    version: v0.33.0
+    url: https://github.com/kubernetes-sigs/kind/releases/download/v0.33.0/kind-windows-amd64
+    sha256: 4b22adaa135368c5a465d56bbd8e520cbea87272a06ca00b6078e7b81515c9fc
+  kubectlMinor: "1.36"
+  helmMajor: "4"
+  pythonMinimum: "3.12"
+  dotnetSdk: "10.0.401"
+  # SonarScanner for .NET, installed into the platform-built `sonar-dotnet` analysis image.
+  sonarScannerDotnet: "11.3.0"
+
+kubernetes:
+  nodeImage: kindest/node:v1.36.4@sha256:099e049362a1526b2db71494e1947aae99bd16290d7c895f2b7ea312e3cbfaed
+
+# Helm charts installed into the kind cluster by the bootstrap.
+charts:
+  argocd:
+    repository: https://argoproj.github.io/argo-helm
+    chart: argo-cd
+    version: 10.9.2
+  kyverno:
+    repository: https://kyverno.github.io/kyverno/
+    chart: kyverno
+    version: 3.9.1
+  externalSecrets:
+    repository: https://charts.external-secrets.io
+    chart: external-secrets
+    version: 2.11.0
+  trivyOperator:
+    repository: https://aquasecurity.github.io/helm-charts/
+    chart: trivy-operator
+    version: 0.36.0
+
+images:
+  # Platform services (Docker Compose foundation)
+  postgres: postgres:18.6-trixie@sha256:5a5a84b19854a9ffaa54082c166ff4ec27473a361e496e5ea167f298f2da9722
+  redis: redis:8.6.7-alpine@sha256:ac2da09bc822f325a9f68f533120b86fa39c1b8db46b3aa7c1bbea7fdfd4fcba
+  rabbitmq: rabbitmq:4.2.9-management-alpine@sha256:cb84d1cee317570eeb9b61d7c64df519399ecb450d16ec93aa035c1d42501475
+  # MinIO no longer publishes community images; Chainguard builds MinIO from source.
+  # Only the digest identifies the build, the tag is informational.
+  minio: cgr.dev/chainguard/minio:latest@sha256:bd014394a80898e68c149f2311fdf8d5a2c2f3bb2c33b9327ae6d02b4b065ae1
+  minioClient: cgr.dev/chainguard/minio-client:latest@sha256:b8b144ab34694ecea25aa352c4be9de4c26ee2a02701521dce02ee5593c57338
+  vault: hashicorp/vault:2.1.1@sha256:47f14a6acb98f48d798a07df7c83f23a6e636e1cf724c5f8ff165cb32667a1e2
+  keycloak: quay.io/keycloak/keycloak:26.7.4@sha256:82a77884f3af238beab1e7afd63b5f530e1b5c0590bd7aa60b40a40463e29b2c
+  gitea: gitea/gitea:1.27.3-rootless@sha256:1c17ecaead42eb3b5391553d8708103a4beb0e86edf5b9ebc1eb269c318845f2
+  giteaRunner: gitea/runner:3.5.0-dind-rootless@sha256:1f3f2a07aaab18bf6ad5566aec872feb206f70722c6649358e436f62a05a38e7
+  sonarqube: sonarqube:26.9.0.129388-community@sha256:4905574ab8584dcac1a06c01cdc43a4ce9e369723ac4a7ab1d029c1bf71e6fe9
+  harborVersion: v2.15.2
+  harborPrepare: goharbor/prepare:v2.15.2@sha256:5b9428fb649b3a0e0fe497189a880d7c9f1281538b85de9ad377cb524e427bd5
+
+  # .NET build and runtime base images
+  dotnetSdk: mcr.microsoft.com/dotnet/sdk:10.0.401-noble@sha256:35d40304542c8689331f8cab17c65926cdf48fe711e289321d71924b230a7d29
+  dotnetAspnet: mcr.microsoft.com/dotnet/aspnet:10.0.12-noble-chiseled@sha256:9651fa59abcdf177c30392cb44a820605ca5d618429ab37acbf6e7c644510b02
+  python: python:3.13.15-slim-trixie@sha256:7c61056e61ac89e852de05f3dc6fa51a6dd2181797bceed46aa725dd7cb2cd3b
+  # Java runtime for the Sonar scanner engine (copied into the sonar-dotnet image).
+  temurinJre: eclipse-temurin:21-jre-noble@sha256:7edbe8532195c8222735caca437e56780e1fc7db08a4b4b4af77fe188cccc15f
+
+  # Security scanners and supply-chain tools (run as sibling containers by CI jobs)
+  gitleaks: zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+  semgrep: semgrep/semgrep:1.178.0-nonroot@sha256:2124de200043ce3ded427d02e924ff3b59d017020614d28c2bb7ce6656bec5d4
+  checkov: bridgecrew/checkov:3.3.19@sha256:d3e96adafdb315ca82e792ca8708c01adae85292800fb064c8b309b3d0cb7b80
+  hadolint: hadolint/hadolint:v2.15.1-debian@sha256:9a3944b7fddcb947d1ffd90829ac1a6e5c30479223358f249d8b96c7d0019e27
+  syft: anchore/syft:v1.52.0@sha256:500e2d872ac019436926e8322b4fc1f39441d94d21f6f4046c6ff29b30e8cb02
+  grype: anchore/grype:v0.119.0@sha256:8c2c9234a345577a6d321a4753aa3ee1276d8975c8452d2344a56b57733ecad3
+  trivy: aquasec/trivy:0.74.0@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969
+  zap: ghcr.io/zaproxy/zaproxy:2.17.0@sha256:781a2bdaea47324e7bab583e2263f21d257b0aee61ed51521a5be45f5f5081ef
+  cosign: ghcr.io/sigstore/cosign/cosign:v3.1.3@sha256:9e5c2f2edc34351160407ca3416c61855bdf9403c3c5936e0f0be7fc261611b8
+  oras: ghcr.io/oras-project/oras:v1.3.4@sha256:f7bc056d54d97baa399414ed5048ecc67c3371b750d4bbce1d871827a5758179
+  crane: gcr.io/go-containerregistry/crane:v0.22.1@sha256:1f968817b95790bed063f71175aa6b8ff879fa17064020415f3e18bb6e6a36e1
+  dockerCli: docker:29.8.1-cli@sha256:018edbc908e08fcc9dbf029c812c34251e9b4719e6f71ca0e5eae2a987d014ca
+  # BuildKit frontend named in the Dockerfile `# syntax=` line; builds use the mirrored copy.
+  dockerfileFrontend: docker/dockerfile:1.27.0@sha256:bde3983e9c939224420ddaf6b784cc30e09b035a4dea01f581230c50809f372e
+
+  # Observability (deployed into the kind cluster)
+  prometheus: prom/prometheus:v3.15.0@sha256:efd719c99d83b060d9daefdcf00360461adf279f45ef5391f8d111892118753e
+  grafana: grafana/grafana:13.0.9@sha256:c26daa778ea9fd817be3fe606ba4b78ea4c217a7a27c1ba8f5faa4418ecc48dd
+  loki: grafana/loki:3.7.8@sha256:1107dd5274e0ada47e42472b7a7e71f3b2a2fe878878108f3e2f9e51528f0193
+  otelCollector: otel/opentelemetry-collector-contrib:0.161.0@sha256:fd328de2552466ad78385e1b1289c3f2402b1c45f265b252aab1955b42845ac1
+
+  # Small utility images used by probes and validation pods
+  alpine: alpine:3.22@sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8
+  busybox: busybox:1.37.0@sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e
+
+# Images the CI zones run. `sscp up --with ci` copies the linux/amd64 manifest of each one
+# (by digest) into Harbor's `platform-tools` project, so pipelines pull only from the
+# platform's own registry and never from the internet.
+ciMirror:
+  - dotnetSdk
+  - dotnetAspnet
+  - python
+  - gitleaks
+  - semgrep
+  - checkov
+  - hadolint
+  - syft
+  - grype
+  - trivy
+  - zap
+  - cosign
+  - oras
+  - crane
+  - dockerCli
+  - dockerfileFrontend
+  - alpine
+  # Data services of the security-test environment (dynamic testing in the security zone)
+  - postgres
+  - redis
+  - rabbitmq
+  - minio
+  # Observability stack in the cluster (manifests in cluster/platform/observability)
+  - prometheus
+  - grafana
+  - loki
+  - otelCollector

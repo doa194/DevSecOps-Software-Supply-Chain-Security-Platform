@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "suite": "commerce-authorization",
+  "target": "http://commerce-gateway:8080",
+  "results": [
+    {
+      "name": "anonymous users can browse the catalogue",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "anonymous users cannot list orders",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "a token with a forged signature is rejected",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "an unsigned token (alg none) is rejected",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "customers cannot create products",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "inventory clerks cannot change prices",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "the server prices orders; client-supplied prices are ignored",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "placing an order requires an idempotency key",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "customers cannot read another customer's order",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "customers cannot list all orders",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "order managers can read any order",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "customers cannot look up other customers",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "support agents see personal data masked",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "customers cannot download another customer's invoice",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "customers cannot read payments",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "administrators cannot issue refunds (separation of duties)",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "customers cannot read reports",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "customers cannot read the audit trail",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "auditors can verify the audit chain",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "customers cannot toggle feature flags",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "administrators cannot change their own roles",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "uploads whose content does not match their type are rejected",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "oversized request bodies are rejected at the gateway",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "responses carry security headers",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "anonymous clients are rate limited",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+# What every application workload must declare so the cluster can run it safely:
+#   - CPU and memory requests and a memory limit (one workload cannot starve the others),
+#   - liveness and readiness probes for long-running workloads (not for Jobs),
+#   - the `app.kubernetes.io/name` and `app.kubernetes.io/part-of` labels on its pods,
+#     which network policies, dashboards and the audit trail rely on.
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: workload-operability
+  annotations:
+    policies.kyverno.io/title: Resources, probes and labels
+spec:
+  failurePolicy: Fail
+  validationActions: [Deny]
+  matchConstraints:
+    namespaceSelector:
+      matchExpressions:
+        - { key: kubernetes.io/metadata.name, operator: In, values: [commerce, commerce-data] }
+    resourceRules:
+      - apiGroups: [apps]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [deployments, statefulsets]
+      - apiGroups: [batch]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [jobs]
+  variables:
+    - name: pod
+      expression: object.spec.template
+    - name: containers
+      expression: >-
+        object.spec.template.spec.containers
+        + (has(object.spec.template.spec.initContainers) ? object.spec.template.spec.initContainers : [])
+  validations:
+    - expression: >-
+        variables.containers.all(c, has(c.resources) && has(c.resources.requests)
+          && "cpu" in c.resources.requests && "memory" in c.resources.requests
+          && has(c.resources.limits) && "memory" in c.resources.limits)
+      message: every container needs CPU and memory requests and a memory limit
+    - expression: >-
+        object.kind == "Job"
+        || object.spec.template.spec.containers.all(c, has(c.livenessProbe) && has(c.readinessProbe))
+      message: long-running containers need liveness and readiness probes
+    - expression: >-
+        has(variables.pod.metadata.labels)
+        && "app.kubernetes.io/name" in variables.pod.metadata.labels
+        && "app.kubernetes.io/part-of" in variables.pod.metadata.labels
+      message: pods need the app.kubernetes.io/name and app.kubernetes.io/part-of labels

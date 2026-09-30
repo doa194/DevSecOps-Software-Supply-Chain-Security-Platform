@@ -1,0 +1,24 @@
+# Secret-scanning configuration of the platform (Gitleaks).
+#
+# The secrets scanner always runs with this file (--config), so a repository's own
+# .gitleaks.toml is never read, and with --ignore-gitleaks-allow and a
+# --gitleaks-ignore-path pointing here, so inline `gitleaks:allow` comments and a
+# repository .gitleaksignore cannot hide findings either. Only a reviewed change to the
+# platform repository can tune secret detection.
+title = "sscp platform secret scanning"
+
+[extend]
+# Every Gitleaks default rule stays active.
+useDefault = true
+
+# The GitOps repository lists which integration events each publisher may send, as
+# `Messaging__TrustedPublishers__<service>-key__AllowedTypes__<n>: <domain>.<event>.v<n>`.
+# The key name ends in "-key" and the value looks random enough for the generic-api-key
+# rule. Only lines of exactly this shape are allowed; any other value on such a line is
+# still reported.
+[[allowlists]]
+description = "Integration event type names in messaging configuration"
+regexTarget = "line"
+regexes = [
+  '''^\s*Messaging__TrustedPublishers__[a-z0-9-]+__AllowedTypes__[0-9]+:\s*[a-z]+(\.[a-z-]+)+\.v[0-9]+\s*$''',
+]

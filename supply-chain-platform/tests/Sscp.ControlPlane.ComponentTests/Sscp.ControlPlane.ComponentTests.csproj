@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- API tests of the Security Control Plane: the real host against disposable PostgreSQL
+       and MinIO, driven the way the CI zones and people drive it. -->
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Testcontainers.Minio" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Sscp.ControlPlane.Api/Sscp.ControlPlane.Api.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The tests run against the real trust policy and application catalogue. -->
+    <None Include="../../policy/*.yaml" Link="policy/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

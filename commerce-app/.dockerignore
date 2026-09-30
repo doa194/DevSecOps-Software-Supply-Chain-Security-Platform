@@ -1,0 +1,14 @@
+# Only source needed to build the deployables enters the build context. Tests, local
+# state and editor files never do, so they cannot end up in an image by accident.
+**/bin/
+**/obj/
+**/TestResults/
+tests/
+.git/
+.gitea/
+.vs/
+.vscode/
+.idea/
+.local/
+**/*.user
+**/appsettings.Development.json

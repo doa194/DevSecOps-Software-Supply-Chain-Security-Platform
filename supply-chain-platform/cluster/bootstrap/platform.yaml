@@ -1,0 +1,60 @@
+# Applied once by `sscp up --with cluster`; everything else reaches the cluster through
+# the application defined here.
+#
+# `platform` project: the platform repository's cluster/platform directory, including
+# cluster-wide resources (namespaces, admission policies). Only this application uses it.
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: platform
+  namespace: argocd
+spec:
+  description: Cluster security configuration, from platform/supply-chain-platform
+  sourceRepos:
+    - https://gitea.sscp.test:3000/platform/supply-chain-platform.git
+  destinations:
+    - { server: https://kubernetes.default.svc, namespace: "*" }
+  clusterResourceWhitelist:
+    - { group: "", kind: Namespace }
+    - { group: policies.kyverno.io, kind: "*" }
+    - { group: admissionregistration.k8s.io, kind: ValidatingAdmissionPolicy }
+    - { group: admissionregistration.k8s.io, kind: ValidatingAdmissionPolicyBinding }
+    # Read-only cluster access for the OpenTelemetry Collector (observability).
+    - { group: rbac.authorization.k8s.io, kind: ClusterRole }
+    - { group: rbac.authorization.k8s.io, kind: ClusterRoleBinding }
+  namespaceResourceWhitelist:
+    - { group: "", kind: ServiceAccount }
+    - { group: "", kind: Service }
+    # The observability stack (namespace observability).
+    - { group: "", kind: ConfigMap }
+    - { group: apps, kind: Deployment }
+    - { group: apps, kind: StatefulSet }
+    - { group: networking.k8s.io, kind: NetworkPolicy }
+    - { group: external-secrets.io, kind: SecretStore }
+    - { group: external-secrets.io, kind: ExternalSecret }
+    - { group: argoproj.io, kind: AppProject }
+    - { group: argoproj.io, kind: Application }
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform-cluster
+  namespace: argocd
+spec:
+  project: platform
+  source:
+    repoURL: https://gitea.sscp.test:3000/platform/supply-chain-platform.git
+    targetRevision: main
+    path: cluster/platform
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    # Kept in sync automatically; removals are pruned by a person on purpose, so a broken
+    # path or branch can never delete the namespaces and policies wholesale.
+    automated:
+      prune: false
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff: { duration: 20s, factor: 2, maxDuration: 5m }

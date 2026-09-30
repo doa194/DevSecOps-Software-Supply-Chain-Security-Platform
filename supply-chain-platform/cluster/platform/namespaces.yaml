@@ -1,0 +1,32 @@
+# Application namespaces. Both enforce the Kubernetes Pod Security Standard `restricted`;
+# Kyverno policies add the platform's own rules on top (see policies/).
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: commerce
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+    sscp.test/zone: application
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observability
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+    sscp.test/zone: platform
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: commerce-data
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+    sscp.test/zone: application

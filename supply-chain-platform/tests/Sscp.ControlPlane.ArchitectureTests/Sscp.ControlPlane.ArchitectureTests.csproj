@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="TngTech.ArchUnitNET.xUnitV3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Sscp.ControlPlane.Api/Sscp.ControlPlane.Api.csproj" />
+  </ItemGroup>
+</Project>

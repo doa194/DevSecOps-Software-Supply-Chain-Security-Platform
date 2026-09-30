@@ -1,0 +1,24 @@
+# Generated on each workstation by the bootstrap automation: local CA, certificates,
+# generated credentials, Vault init material, tool binaries and run records.
+# None of this may ever be committed.
+.local/
+.tools/
+.runs/
+
+# .NET build output
+bin/
+obj/
+TestResults/
+*.user
+.vs/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Editors
+.idea/
+.vscode/

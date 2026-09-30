@@ -1,0 +1,11 @@
+# Grafana dashboard provider: the committed dashboards/*.json, read-only.
+# Packed into the `grafana-provisioning` ConfigMap by ../../kustomization.yaml; a change here restarts the pod.
+apiVersion: 1
+providers:
+  - name: sscp
+    folder: Supply chain security platform
+    type: file
+    disableDeletion: true
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards

@@ -1,0 +1,44 @@
+# The local deployment target: a single-node kind cluster.
+#
+# `sscp up --with cluster` creates it on the `sscp-edge` Docker network (dynamic address
+# range 172.30.128.0/17), so the node reaches Harbor, Vault and Keycloak under the same
+# names CI uses. The node image is pinned by digest in versions.yaml. Nothing in CI has
+# credentials for this cluster: changes arrive only through Argo CD.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: sscp
+# etcd, the cluster's datastore, normally waits for every write to reach the disk. On a
+# workstation (and especially on a hard disk) that makes the API server time out. The
+# cluster is rebuilt from Git by `sscp up --with cluster`, so it runs without those waits:
+# an unclean Docker stop can lose the last moments of cluster state, which Argo CD then
+# re-applies. See docs/production-considerations.md.
+kubeadmConfigPatches:
+  - |
+    kind: ClusterConfiguration
+    etcd:
+      local:
+        extraArgs:
+          - name: unsafe-no-fsync
+            value: "true"
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      # Commerce gateway (NodePort 30080), reachable only from this workstation.
+      - containerPort: 30080
+        hostPort: 8088
+        listenAddress: 127.0.0.1
+        protocol: TCP
+      # Argo CD web UI and API (NodePort 30444), reachable only from this workstation.
+      - containerPort: 30444
+        hostPort: 8444
+        listenAddress: 127.0.0.1
+        protocol: TCP
+      # Grafana (NodePort 30300) and Prometheus (NodePort 30990), reachable only from this workstation.
+      - containerPort: 30300
+        hostPort: 3300
+        listenAddress: 127.0.0.1
+        protocol: TCP
+      - containerPort: 30990
+        hostPort: 9990
+        listenAddress: 127.0.0.1
+        protocol: TCP

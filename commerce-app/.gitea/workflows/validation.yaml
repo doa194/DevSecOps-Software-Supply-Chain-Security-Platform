@@ -1,0 +1,41 @@
+# Validation pipeline of the application repository (untrusted zone).
+#
+# Runs on `sscp-validation`, the only runner this repository can reach. Jobs get no Docker
+# socket and no secrets: they compile the solution and run the fast test suites.
+# Security scanning, image builds and releases are platform-owned pipelines started by the
+# Security Control Plane, so nothing in this file can influence a trust decision.
+name: validation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: sscp-validation
+    timeout-minutes: 30
+    env:
+      CI: "true"
+      REPOSITORY: ${{ gitea.repository }}
+      GIT_REF: ${{ gitea.ref }}
+      JOB_TOKEN: ${{ gitea.token }}
+    steps:
+      - name: Check out the commit
+        run: |
+          git init -q .
+          git -c http.sslCAInfo="$SSCP_CA_FILE" -c http.extraHeader="Authorization: token $JOB_TOKEN" \
+            fetch -q --depth 1 "https://gitea.sscp.test:3000/$REPOSITORY.git" "$GIT_REF"
+          git checkout -q FETCH_HEAD
+          echo "commit $(git rev-parse HEAD)"
+
+      - name: Restore (locked, signed packages only)
+        run: dotnet restore Commerce.slnx --locked-mode
+
+      - name: Build
+        run: dotnet build Commerce.slnx --configuration Release --no-restore
+
+      - name: Unit and architecture tests
+        run: |
+          dotnet test tests/Commerce.UnitTests --configuration Release --no-build
+          dotnet test tests/Commerce.ArchitectureTests --configuration Release --no-build

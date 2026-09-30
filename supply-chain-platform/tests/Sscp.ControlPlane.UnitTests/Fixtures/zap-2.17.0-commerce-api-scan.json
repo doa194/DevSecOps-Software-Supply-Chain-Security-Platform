@@ -1,0 +1,1641 @@
+{
+	"@programName": "ZAP",
+	"@version": "2.17.0",
+	"@generated": "Mon, 28 Sept 2026 00:57:52",
+	"created": "2026-09-28T00:57:52.411358867Z",
+	"insights":[
+		{
+			"level": "Low",
+			"reason": "Exceeded High",
+			"site": "http://commerce-gateway:8080",
+			"key": "insight.code.4xx",
+			"description": "Percentage of responses with status code 4xx",
+			"statistic": "99"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://commerce-api:8080",
+			"key": "insight.code.2xx",
+			"description": "Percentage of responses with status code 2xx",
+			"statistic": "100"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://commerce-api:8080",
+			"key": "insight.endpoint.ctype.application/json",
+			"description": "Percentage of endpoints with content type application/json",
+			"statistic": "100"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://commerce-api:8080",
+			"key": "insight.endpoint.method.GET",
+			"description": "Percentage of endpoints with method GET",
+			"statistic": "100"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://commerce-api:8080",
+			"key": "insight.endpoint.total",
+			"description": "Count of total endpoints",
+			"statistic": "1"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://commerce-api:8080",
+			"key": "insight.response.slow",
+			"description": "Percentage of slow responses",
+			"statistic": "100"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://commerce-gateway:8080",
+			"key": "insight.code.2xx",
+			"description": "Percentage of responses with status code 2xx",
+			"statistic": "5"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://commerce-gateway:8080",
+			"key": "insight.endpoint.ctype.application/json",
+			"description": "Percentage of endpoints with content type application/json",
+			"statistic": "4"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://commerce-gateway:8080",
+			"key": "insight.endpoint.ctype.application/problem+json",
+			"description": "Percentage of endpoints with content type application/problem+json",
+			"statistic": "95"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://commerce-gateway:8080",
+			"key": "insight.endpoint.method.DELETE",
+			"description": "Percentage of endpoints with method DELETE",
+			"statistic": "1"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://commerce-gateway:8080",
+			"key": "insight.endpoint.method.GET",
+			"description": "Percentage of endpoints with method GET",
+			"statistic": "68"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://commerce-gateway:8080",
+			"key": "insight.endpoint.method.POST",
+			"description": "Percentage of endpoints with method POST",
+			"statistic": "19"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://commerce-gateway:8080",
+			"key": "insight.endpoint.method.PUT",
+			"description": "Percentage of endpoints with method PUT",
+			"statistic": "10"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "http://commerce-gateway:8080",
+			"key": "insight.endpoint.total",
+			"description": "Count of total endpoints",
+			"statistic": "121"
+		}
+	],
+	"site":[ 
+		{
+			"@name": "http://commerce-gateway:8080",
+			"@host": "commerce-gateway",
+			"@port": "8080",
+			"@ssl": "false",
+			"alerts": [ 
+				{
+					"pluginid": "100000",
+					"alertRef": "100000-1",
+					"alert": "A Client Error response code was returned by the server",
+					"name": "A Client Error response code was returned by the server",
+					"riskcode": "0",
+					"confidence": "3",
+					"riskdesc": "Informational (High)",
+					"desc": "<p>A response code of 404 was returned by the server.</p><p>This may indicate that the application is failing to handle unexpected input correctly.</p><p>Raised by the 'Alert on HTTP Response Code Error' script</p>",
+					"instances":[ 
+						{
+							"id": "4",
+							"uri": "http://commerce-gateway:8080/api/customers/me/addresses/addressId",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/me\/addresses\/addressId",
+							"method": "DELETE",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3650",
+							"uri": "http://commerce-gateway:8080/api/customers/me/addresses/addressId/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/me\/addresses\/addressId\/",
+							"method": "DELETE",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "47",
+							"uri": "http://commerce-gateway:8080",
+							"nodeName": "http:\/\/commerce-gateway:8080",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3660",
+							"uri": "http://commerce-gateway:8080/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "25",
+							"uri": "http://commerce-gateway:8080/3687692208289215845",
+							"nodeName": "http:\/\/commerce-gateway:8080\/3687692208289215845",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "49",
+							"uri": "http://commerce-gateway:8080/api",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "397",
+							"uri": "http://commerce-gateway:8080/api",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3662",
+							"uri": "http://commerce-gateway:8080/api/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "26",
+							"uri": "http://commerce-gateway:8080/api/6502063574255760803",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/6502063574255760803",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "61",
+							"uri": "http://commerce-gateway:8080/api/admin",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/admin",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "409",
+							"uri": "http://commerce-gateway:8080/api/admin",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/admin",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3664",
+							"uri": "http://commerce-gateway:8080/api/admin/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/admin\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "27",
+							"uri": "http://commerce-gateway:8080/api/admin/7955731928704504643",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/admin\/7955731928704504643",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3665",
+							"uri": "http://commerce-gateway:8080/api/admin/features/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/admin\/features\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "28",
+							"uri": "http://commerce-gateway:8080/api/admin/features/8269945753947707030",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/admin\/features\/8269945753947707030",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "405",
+							"otherinfo": ""
+						},
+						{
+							"id": "4179",
+							"uri": "http://commerce-gateway:8080/api/admin/features/actuator/health",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/admin\/features\/actuator\/health",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "77",
+							"uri": "http://commerce-gateway:8080/api/catalog",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "421",
+							"uri": "http://commerce-gateway:8080/api/catalog",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3668",
+							"uri": "http://commerce-gateway:8080/api/catalog/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "29",
+							"uri": "http://commerce-gateway:8080/api/catalog/8898302043675008762",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/8898302043675008762",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "429",
+							"uri": "http://commerce-gateway:8080/api/catalog/products",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "265",
+							"uri": "http://commerce-gateway:8080/api/catalog/products?Category=Category&Search=ZAP&MinPrice=http%3A%2F%2Fwww.google.com%2F&MaxPrice=1.2&Page=1&PageSize=20",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products (Category,MaxPrice,MinPrice,Page,PageSize,Search)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "400",
+							"otherinfo": ""
+						},
+						{
+							"id": "369",
+							"uri": "http://commerce-gateway:8080/api/catalog/products?Category=Category&Search=ZAP&MinPrice=1.2&MaxPrice=1.2&Page=1&PageSize=www.google.com%2Fsearch%3Fq%3DZAP",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products (Category,MaxPrice,MinPrice,Page,PageSize,Search)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3670",
+							"uri": "http://commerce-gateway:8080/api/catalog/products/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "30",
+							"uri": "http://commerce-gateway:8080/api/catalog/products/4193635022270132240",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products\/4193635022270132240",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "7",
+							"uri": "http://commerce-gateway:8080/api/catalog/products/id",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products\/id",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3669",
+							"uri": "http://commerce-gateway:8080/api/catalog/products/id/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products\/id\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "31",
+							"uri": "http://commerce-gateway:8080/api/catalog/products/id/1098148300557725809",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products\/id\/1098148300557725809",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "436",
+							"uri": "http://commerce-gateway:8080/api/customers",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "231",
+							"uri": "http://commerce-gateway:8080/api/customers?email=zaproxy%40example.com&Page=http%3A%2F%2Fwww.google.com%2F&PageSize=20",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers (Page,PageSize,email)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "400",
+							"otherinfo": ""
+						},
+						{
+							"id": "301",
+							"uri": "http://commerce-gateway:8080/api/customers?email=zaproxy%40example.com&Page=1&PageSize=http%3A%2F%2Fwww.google.com%2Fsearch%3Fq%3DZAP",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers (Page,PageSize,email)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3676",
+							"uri": "http://commerce-gateway:8080/api/customers/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "32",
+							"uri": "http://commerce-gateway:8080/api/customers/8637574112938804933",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/8637574112938804933",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "5",
+							"uri": "http://commerce-gateway:8080/api/customers/id",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/id",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3673",
+							"uri": "http://commerce-gateway:8080/api/customers/id/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/id\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "1",
+							"uri": "http://commerce-gateway:8080/api/customers/me",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/me",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "403",
+							"otherinfo": ""
+						},
+						{
+							"id": "3675",
+							"uri": "http://commerce-gateway:8080/api/customers/me/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/me\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "33",
+							"uri": "http://commerce-gateway:8080/api/customers/me/3255616546226371047",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/me\/3255616546226371047",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "118",
+							"uri": "http://commerce-gateway:8080/api/customers/me/addresses",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/me\/addresses",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "405",
+							"otherinfo": ""
+						},
+						{
+							"id": "448",
+							"uri": "http://commerce-gateway:8080/api/customers/me/addresses",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/me\/addresses",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3678",
+							"uri": "http://commerce-gateway:8080/api/customers/me/addresses/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/me\/addresses\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "34",
+							"uri": "http://commerce-gateway:8080/api/customers/me/addresses/538887518775917841",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/me\/addresses\/538887518775917841",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "405",
+							"otherinfo": ""
+						},
+						{
+							"id": "130",
+							"uri": "http://commerce-gateway:8080/api/documents",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/documents",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "405",
+							"otherinfo": ""
+						},
+						{
+							"id": "461",
+							"uri": "http://commerce-gateway:8080/api/documents",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/documents",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3680",
+							"uri": "http://commerce-gateway:8080/api/documents/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/documents\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "35",
+							"uri": "http://commerce-gateway:8080/api/documents/5551902022960533910",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/documents\/5551902022960533910",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "22",
+							"uri": "http://commerce-gateway:8080/api/documents/id",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/documents\/id",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3684",
+							"uri": "http://commerce-gateway:8080/api/documents/id/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/documents\/id\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "36",
+							"uri": "http://commerce-gateway:8080/api/documents/id/4599785765068173072",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/documents\/id\/4599785765068173072",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "23",
+							"uri": "http://commerce-gateway:8080/api/documents/id/content",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/documents\/id\/content",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3683",
+							"uri": "http://commerce-gateway:8080/api/documents/id/content/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/documents\/id\/content\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "21",
+							"uri": "http://commerce-gateway:8080/api/documents/mine",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/documents\/mine",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "403",
+							"otherinfo": ""
+						},
+						{
+							"id": "3681",
+							"uri": "http://commerce-gateway:8080/api/documents/mine/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/documents\/mine\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "138",
+							"uri": "http://commerce-gateway:8080/api/identity",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/identity",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "468",
+							"uri": "http://commerce-gateway:8080/api/identity",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/identity",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3687",
+							"uri": "http://commerce-gateway:8080/api/identity/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/identity\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "37",
+							"uri": "http://commerce-gateway:8080/api/identity/2538070129426329135",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/identity\/2538070129426329135",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3686",
+							"uri": "http://commerce-gateway:8080/api/identity/me/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/identity\/me\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "154",
+							"uri": "http://commerce-gateway:8080/api/identity/users",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/identity\/users",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "477",
+							"uri": "http://commerce-gateway:8080/api/identity/users",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/identity\/users",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3688",
+							"uri": "http://commerce-gateway:8080/api/identity/users/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/identity\/users\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "38",
+							"uri": "http://commerce-gateway:8080/api/identity/users/6208289328857173556",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/identity\/users\/6208289328857173556",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "160",
+							"uri": "http://commerce-gateway:8080/api/identity/users/Zaproxy%20dolore%20alias%20impedit%20expedita%20quisquam.",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/identity\/users\/Zaproxy dolore alias impedit expedita quisquam.",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "491",
+							"uri": "http://commerce-gateway:8080/api/identity/users/Zaproxy%20dolore%20alias%20impedit%20expedita%20quisquam.",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/identity\/users\/Zaproxy dolore alias impedit expedita quisquam.",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3690",
+							"uri": "http://commerce-gateway:8080/api/identity/users/Zaproxy%20dolore%20alias%20impedit%20expedita%20quisquam./",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/identity\/users\/Zaproxy dolore alias impedit expedita quisquam.\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "39",
+							"uri": "http://commerce-gateway:8080/api/identity/users/Zaproxy%20dolore%20alias%20impedit%20expedita%20quisquam./812550604048863264",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/identity\/users\/Zaproxy dolore alias impedit expedita quisquam.\/812550604048863264",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "165",
+							"uri": "http://commerce-gateway:8080/api/inventory",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/inventory",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "501",
+							"uri": "http://commerce-gateway:8080/api/inventory",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/inventory",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3692",
+							"uri": "http://commerce-gateway:8080/api/inventory/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/inventory\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "40",
+							"uri": "http://commerce-gateway:8080/api/inventory/6236134457162373386",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/inventory\/6236134457162373386",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3695",
+							"uri": "http://commerce-gateway:8080/api/inventory/low-stock/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/inventory\/low-stock\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "11",
+							"uri": "http://commerce-gateway:8080/api/inventory/sku",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/inventory\/sku",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3694",
+							"uri": "http://commerce-gateway:8080/api/inventory/sku/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/inventory\/sku\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "41",
+							"uri": "http://commerce-gateway:8080/api/inventory/sku/1273141713478665809",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/inventory\/sku\/1273141713478665809",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "510",
+							"uri": "http://commerce-gateway:8080/api/orders",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "174",
+							"uri": "http://commerce-gateway:8080/api/orders?status=http%3A%2F%2Fwww.google.com%2F&Page=1&PageSize=20",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders (Page,PageSize,status)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "400",
+							"otherinfo": ""
+						},
+						{
+							"id": "303",
+							"uri": "http://commerce-gateway:8080/api/orders?status=10&Page=www.google.com%3A80%2Fsearch%3Fq%3DZAP&PageSize=20",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders (Page,PageSize,status)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3696",
+							"uri": "http://commerce-gateway:8080/api/orders/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "42",
+							"uri": "http://commerce-gateway:8080/api/orders/8702311147918681607",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders\/8702311147918681607",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "14",
+							"uri": "http://commerce-gateway:8080/api/orders/id",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders\/id",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3697",
+							"uri": "http://commerce-gateway:8080/api/orders/id/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders\/id\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "43",
+							"uri": "http://commerce-gateway:8080/api/orders/id/4239122735877224528",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders\/id\/4239122735877224528",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "15",
+							"uri": "http://commerce-gateway:8080/api/orders/mine?Page=1&PageSize=20",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders\/mine (Page,PageSize)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "403",
+							"otherinfo": ""
+						},
+						{
+							"id": "528",
+							"uri": "http://commerce-gateway:8080/api/orders/mine?Page=8593235756850001239.owasp.org&PageSize=20",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders\/mine (Page,PageSize)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3699",
+							"uri": "http://commerce-gateway:8080/api/orders/mine/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders\/mine\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "182",
+							"uri": "http://commerce-gateway:8080/api/payments",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "525",
+							"uri": "http://commerce-gateway:8080/api/payments",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3701",
+							"uri": "http://commerce-gateway:8080/api/payments/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "44",
+							"uri": "http://commerce-gateway:8080/api/payments/8412705592419539532",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments\/8412705592419539532",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "190",
+							"uri": "http://commerce-gateway:8080/api/payments/orders",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments\/orders",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "546",
+							"uri": "http://commerce-gateway:8080/api/payments/orders",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments\/orders",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3704",
+							"uri": "http://commerce-gateway:8080/api/payments/orders/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments\/orders\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "45",
+							"uri": "http://commerce-gateway:8080/api/payments/orders/6487716955769088652",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments\/orders\/6487716955769088652",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "18",
+							"uri": "http://commerce-gateway:8080/api/payments/orders/orderId",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments\/orders\/orderId",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3706",
+							"uri": "http://commerce-gateway:8080/api/payments/orders/orderId/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments\/orders\/orderId\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "200",
+							"uri": "http://commerce-gateway:8080/api/payments/paymentId",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments\/paymentId",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "558",
+							"uri": "http://commerce-gateway:8080/api/payments/paymentId",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments\/paymentId",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3705",
+							"uri": "http://commerce-gateway:8080/api/payments/paymentId/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments\/paymentId\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "46",
+							"uri": "http://commerce-gateway:8080/api/payments/paymentId/6113675604854531847",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments\/paymentId\/6113675604854531847",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "6",
+							"uri": "http://commerce-gateway:8080/api/catalog/products",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products ()({roles:[]})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "400",
+							"otherinfo": ""
+						},
+						{
+							"id": "374",
+							"uri": "http://commerce-gateway:8080/api/catalog/products",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products ()({roles:[]})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3645",
+							"uri": "http://commerce-gateway:8080/api/catalog/products/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products\/ ()({roles:[]})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "9",
+							"uri": "http://commerce-gateway:8080/api/catalog/products/id/activate",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products\/id\/activate",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3648",
+							"uri": "http://commerce-gateway:8080/api/catalog/products/id/activate/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products\/id\/activate\/",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "10",
+							"uri": "http://commerce-gateway:8080/api/catalog/products/id/retire",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products\/id\/retire",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3646",
+							"uri": "http://commerce-gateway:8080/api/catalog/products/id/retire/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products\/id\/retire\/",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "2",
+							"uri": "http://commerce-gateway:8080/api/customers/me",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/me ()({displayName,phone})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "403",
+							"otherinfo": ""
+						},
+						{
+							"id": "378",
+							"uri": "http://commerce-gateway:8080/api/customers/me",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/me ()({displayName,phone})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3651",
+							"uri": "http://commerce-gateway:8080/api/customers/me/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/me\/ ()({displayName,phone})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3",
+							"uri": "http://commerce-gateway:8080/api/customers/me/addresses",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/me\/addresses ()({label,line1,city,postalCode,country,makeDefault})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "403",
+							"otherinfo": ""
+						},
+						{
+							"id": "300",
+							"uri": "http://commerce-gateway:8080/api/customers/me/addresses",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/me\/addresses ()({label,line1,city,postalCode,country,makeDefault})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3647",
+							"uri": "http://commerce-gateway:8080/api/customers/me/addresses/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers\/me\/addresses\/ ()({label,line1,city,postalCode,country,makeDefault})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "20",
+							"uri": "http://commerce-gateway:8080/api/documents",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/documents ()(multipart:file)",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "403",
+							"otherinfo": ""
+						},
+						{
+							"id": "388",
+							"uri": "http://commerce-gateway:8080/api/documents",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/documents ()(multipart:file)",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "4283",
+							"uri": "http://commerce-gateway:8080/api/documents",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/documents ()(multipart:rtobject)",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3652",
+							"uri": "http://commerce-gateway:8080/api/documents/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/documents\/ ()(multipart:file)",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "12",
+							"uri": "http://commerce-gateway:8080/api/inventory/sku/receipts",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/inventory\/sku\/receipts ()({quantity,reference})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "400",
+							"otherinfo": ""
+						},
+						{
+							"id": "380",
+							"uri": "http://commerce-gateway:8080/api/inventory/sku/receipts",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/inventory\/sku\/receipts ()({quantity,reference})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3656",
+							"uri": "http://commerce-gateway:8080/api/inventory/sku/receipts/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/inventory\/sku\/receipts\/ ()({quantity,reference})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "13",
+							"uri": "http://commerce-gateway:8080/api/orders",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders ()({roles:[]})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "403",
+							"otherinfo": ""
+						},
+						{
+							"id": "136",
+							"uri": "http://commerce-gateway:8080/api/orders",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders ()({roles:[]})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3659",
+							"uri": "http://commerce-gateway:8080/api/orders/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders\/ ()({roles:[]})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "16",
+							"uri": "http://commerce-gateway:8080/api/orders/id/cancel",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders\/id\/cancel",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3655",
+							"uri": "http://commerce-gateway:8080/api/orders/id/cancel/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders\/id\/cancel\/",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "17",
+							"uri": "http://commerce-gateway:8080/api/orders/id/fulfil",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders\/id\/fulfil",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "3653",
+							"uri": "http://commerce-gateway:8080/api/orders/id/fulfil/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/orders\/id\/fulfil\/",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "19",
+							"uri": "http://commerce-gateway:8080/api/payments/paymentId/refunds",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments\/paymentId\/refunds ()({amount,reason})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "385",
+							"uri": "http://commerce-gateway:8080/api/payments/paymentId/refunds",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments\/paymentId\/refunds ()({amount,reason})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3658",
+							"uri": "http://commerce-gateway:8080/api/payments/paymentId/refunds/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/payments\/paymentId\/refunds\/ ()({amount,reason})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "24",
+							"uri": "http://commerce-gateway:8080/api/admin/features/ZAP",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/admin\/features\/ZAP ()({enabled,reason})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "371",
+							"uri": "http://commerce-gateway:8080/api/admin/features/ZAP",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/admin\/features\/ZAP ()({enabled,reason})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3649",
+							"uri": "http://commerce-gateway:8080/api/admin/features/ZAP/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/admin\/features\/ZAP\/ ()({enabled,reason})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "8",
+							"uri": "http://commerce-gateway:8080/api/catalog/products/id/price",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products\/id\/price ()({price,currency})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "372",
+							"uri": "http://commerce-gateway:8080/api/catalog/products/id/price",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products\/id\/price ()({price,currency})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3644",
+							"uri": "http://commerce-gateway:8080/api/catalog/products/id/price/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/catalog\/products\/id\/price\/ ()({price,currency})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "0",
+							"uri": "http://commerce-gateway:8080/api/identity/users/Zaproxy%20dolore%20alias%20impedit%20expedita%20quisquam./roles",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/identity\/users\/Zaproxy dolore alias impedit expedita quisquam.\/roles ()({roles:[]})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "390",
+							"uri": "http://commerce-gateway:8080/api/identity/users/Zaproxy%20dolore%20alias%20impedit%20expedita%20quisquam./roles",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/identity\/users\/Zaproxy dolore alias impedit expedita quisquam.\/roles ()({roles:[]})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "3654",
+							"uri": "http://commerce-gateway:8080/api/identity/users/Zaproxy%20dolore%20alias%20impedit%20expedita%20quisquam./roles/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/identity\/users\/Zaproxy dolore alias impedit expedita quisquam.\/roles\/ ()({roles:[]})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "429",
+							"otherinfo": ""
+						},
+						{
+							"id": "2726",
+							"uri": "http://commerce-gateway:8080/computeMetadata/v1/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/computeMetadata\/v1\/ ()({enabled,reason})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2715",
+							"uri": "http://commerce-gateway:8080/latest/meta-data/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/latest\/meta-data\/ ()({enabled,reason})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2833",
+							"uri": "http://commerce-gateway:8080/metadata/instance",
+							"nodeName": "http:\/\/commerce-gateway:8080\/metadata\/instance ()({enabled,reason})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2851",
+							"uri": "http://commerce-gateway:8080/metadata/v1",
+							"nodeName": "http:\/\/commerce-gateway:8080\/metadata\/v1 ()({enabled,reason})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2751",
+							"uri": "http://commerce-gateway:8080/opc/v1/instance/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/opc\/v1\/instance\/ ()({enabled,reason})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2781",
+							"uri": "http://commerce-gateway:8080/opc/v2/instance/",
+							"nodeName": "http:\/\/commerce-gateway:8080\/opc\/v2\/instance\/ ()({enabled,reason})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2872",
+							"uri": "http://commerce-gateway:8080/openstack/latest/meta_data.json",
+							"nodeName": "http:\/\/commerce-gateway:8080\/openstack\/latest\/meta_data.json ()({enabled,reason})",
+							"method": "PUT",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						}
+					],
+					"count": "145",
+					"systemic": false,
+					"solution": "",
+					"otherinfo": "",
+					"reference": "",
+					"cweid": "388",
+					"wascid": "20",
+					"sourceid": "16"
+				},
+				{
+					"pluginid": "10024",
+					"alertRef": "10024",
+					"alert": "Information Disclosure - Sensitive Information in URL",
+					"name": "Information Disclosure - Sensitive Information in URL",
+					"riskcode": "0",
+					"confidence": "2",
+					"riskdesc": "Informational (Medium)",
+					"desc": "<p>The request appeared to contain sensitive information leaked in the URL. This can violate PCI and most organizational compliance policies. You can configure the list of strings for this check to add or remove values specific to your environment.</p>",
+					"instances":[ 
+						{
+							"id": "219",
+							"uri": "http://commerce-gateway:8080/api/customers?email=zaproxy@example.com&Page=1&PageSize=20",
+							"nodeName": "http:\/\/commerce-gateway:8080\/api\/customers (Page,PageSize,email)",
+							"method": "GET",
+							"param": "email",
+							"attack": "",
+							"evidence": "zaproxy@example.com",
+							"otherinfo": "The URL contains email address(es)."
+						}
+					],
+					"count": "1",
+					"systemic": false,
+					"solution": "<p>Do not pass sensitive information in URIs.</p>",
+					"otherinfo": "<p>The URL contains email address(es).</p>",
+					"reference": "",
+					"cweid": "598",
+					"wascid": "13",
+					"sourceid": "19"
+				}
+			]
+		},
+		{
+			"@name": "http://commerce-api:8080",
+			"@host": "commerce-api",
+			"@port": "8080",
+			"@ssl": "false",
+			"alerts": [ 
+			]
+		}
+	],
+	"sequences":[
+	]
+
+}

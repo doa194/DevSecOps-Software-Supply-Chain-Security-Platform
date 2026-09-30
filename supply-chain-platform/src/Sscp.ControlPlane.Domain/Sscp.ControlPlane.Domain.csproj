@@ -1,0 +1,3 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Pure trust model: artifact lifecycle, trust policy, exceptions and SLA rules. No I/O. -->
+</Project>

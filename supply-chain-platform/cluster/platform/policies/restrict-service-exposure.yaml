@@ -1,0 +1,28 @@
+# Application Services stay inside the cluster. The only exception is the platform-owned
+# `commerce-gateway-external` NodePort (see ../exposure.yaml); a GitOps change cannot open
+# another way in with a NodePort, LoadBalancer or external IP.
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: restrict-service-exposure
+  annotations:
+    policies.kyverno.io/title: No new external exposure
+spec:
+  failurePolicy: Fail
+  validationActions: [Deny]
+  matchConstraints:
+    namespaceSelector:
+      matchExpressions:
+        - { key: kubernetes.io/metadata.name, operator: In, values: [commerce, commerce-data] }
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [services]
+  validations:
+    - expression: >-
+        !has(object.spec.type) || object.spec.type == "ClusterIP"
+        || (namespaceObject.metadata.name == "commerce" && object.metadata.name == "commerce-gateway-external" && object.spec.type == "NodePort")
+      message: only ClusterIP Services are allowed; external access goes through the platform's gateway NodePort
+    - expression: '!has(object.spec.externalIPs) || size(object.spec.externalIPs) == 0'
+      message: externalIPs are not allowed

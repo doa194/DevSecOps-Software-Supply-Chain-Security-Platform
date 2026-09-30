@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Use cases, evidence readers and the ports (interfaces) the infrastructure implements. -->
+  <ItemGroup>
+    <ProjectReference Include="../Sscp.ControlPlane.Domain/Sscp.ControlPlane.Domain.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+</Project>

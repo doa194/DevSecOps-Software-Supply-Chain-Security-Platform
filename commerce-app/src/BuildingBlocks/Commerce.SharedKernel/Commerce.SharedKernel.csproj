@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Pure building blocks shared by every module's domain model and contracts.
+       Only the tiny compliance abstractions package is allowed here, so data can be
+       classified where it is defined. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Compliance.Abstractions" />
+  </ItemGroup>
+</Project>

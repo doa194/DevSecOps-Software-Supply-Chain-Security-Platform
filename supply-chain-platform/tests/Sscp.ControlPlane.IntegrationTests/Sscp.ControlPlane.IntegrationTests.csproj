@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Database behaviour of the Control Plane against a real, disposable PostgreSQL:
+       runtime-role privileges and the audit hash chain. -->
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Sscp.ControlPlane.Infrastructure/Sscp.ControlPlane.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

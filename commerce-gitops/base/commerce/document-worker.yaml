@@ -1,0 +1,144 @@
+# document-worker: Deployment, Service and its secrets (from Vault through External Secrets).
+# `image` is the logical name; the overlay pins the signed, trusted digest.
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: document-worker
+  namespace: commerce
+  labels:
+    app.kubernetes.io/part-of: commerce
+  annotations:
+    argocd.argoproj.io/sync-wave: '0'
+spec:
+  refreshInterval: 5m
+  secretStoreRef:
+    kind: SecretStore
+    name: vault
+  target:
+    name: document-worker
+    creationPolicy: Owner
+    deletionPolicy: Retain
+  dataFrom:
+  - extract:
+      key: workload/commerce/document-worker
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: document-worker
+  namespace: commerce
+  labels:
+    app.kubernetes.io/name: document-worker
+    app.kubernetes.io/part-of: commerce
+  annotations:
+    argocd.argoproj.io/sync-wave: '2'
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: document-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: document-worker
+        app.kubernetes.io/part-of: commerce
+    spec:
+      serviceAccountName: document-worker
+      automountServiceAccountToken: false
+      imagePullSecrets:
+      - name: harbor-pull
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1654
+        runAsGroup: 1654
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: document-worker
+        image: document-worker
+        ports:
+        - name: http
+          containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: commerce-config
+        - configMapRef:
+            name: commerce-messaging
+        - secretRef:
+            name: document-worker
+        env:
+        - name: Messaging__Source
+          value: document-worker
+        - name: Messaging__Signing__KeyId
+          value: document-worker-key
+        - name: RELEASE_TAG
+          valueFrom:
+            configMapKeyRef:
+              name: commerce-release
+              key: tag
+        - name: RELEASE_COMMIT
+          valueFrom:
+            configMapKeyRef:
+              name: commerce-release
+              key: commit
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: sscp.release.tag=$(RELEASE_TAG),sscp.release.commit=$(RELEASE_COMMIT),k8s.container.name=document-worker
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 256Mi
+        startupProbe:
+          httpGet:
+            path: /health/live
+            port: http
+          periodSeconds: 3
+          failureThreshold: 40
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: http
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: http
+          periodSeconds: 10
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: sscp-root-ca
+          mountPath: /etc/sscp
+          readOnly: true
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 64Mi
+      - name: sscp-root-ca
+        configMap:
+          name: sscp-root-ca
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: document-worker
+  namespace: commerce
+  labels:
+    app.kubernetes.io/name: document-worker
+    app.kubernetes.io/part-of: commerce
+spec:
+  selector:
+    app.kubernetes.io/name: document-worker
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http

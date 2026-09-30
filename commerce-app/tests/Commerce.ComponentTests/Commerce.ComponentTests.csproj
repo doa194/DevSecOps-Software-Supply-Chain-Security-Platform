@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- API contract and authorization tests: the real API host over disposable PostgreSQL,
+       Redis and RabbitMQ, called with locally signed test tokens. -->
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Testcontainers.RabbitMq" />
+    <PackageReference Include="Testcontainers.Redis" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Hosts/Commerce.Api/Commerce.Api.csproj" />
+  </ItemGroup>
+</Project>

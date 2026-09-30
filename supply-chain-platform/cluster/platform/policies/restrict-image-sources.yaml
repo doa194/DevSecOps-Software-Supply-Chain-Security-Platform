@@ -1,0 +1,45 @@
+# Where application images may come from, and how they are referenced.
+#
+#   commerce       harbor.sscp.test:8443/commerce-trusted/...  (signed releases only)
+#   commerce-data  harbor.sscp.test:8443/platform-tools/...    (the platform's mirror)
+#
+# Every image must be pinned by digest, so what runs is exactly what was checked; a tag
+# (and `latest` in particular) is never accepted as the identity of an image.
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: restrict-image-sources
+  annotations:
+    policies.kyverno.io/title: Approved registries and digest-pinned images
+spec:
+  failurePolicy: Fail
+  validationActions: [Deny]
+  autogen:
+    podControllers:
+      controllers: [deployments, statefulsets, jobs]
+  matchConstraints:
+    namespaceSelector:
+      matchExpressions:
+        - { key: kubernetes.io/metadata.name, operator: In, values: [commerce, commerce-data] }
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods]
+  variables:
+    - name: images
+      expression: >-
+        object.spec.containers.map(c, c.image)
+        + (has(object.spec.initContainers) ? object.spec.initContainers.map(c, c.image) : [])
+    - name: registry
+      expression: >-
+        namespaceObject.metadata.name == "commerce"
+        ? "harbor.sscp.test:8443/commerce-trusted/"
+        : "harbor.sscp.test:8443/platform-tools/"
+  validations:
+    - expression: variables.images.all(image, image.startsWith(variables.registry))
+      messageExpression: '"images in namespace " + namespaceObject.metadata.name + " must come from " + variables.registry'
+    - expression: variables.images.all(image, image.contains("@sha256:"))
+      message: images must be pinned by digest (repository@sha256:...)
+    - expression: variables.images.all(image, !image.split("@")[0].endsWith(":latest"))
+      message: the latest tag is not allowed

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Boundary behaviour of the YARP gateway in front of a fake backend. -->
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Hosts/Commerce.Gateway/Commerce.Gateway.csproj" />
+  </ItemGroup>
+</Project>

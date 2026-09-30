@@ -1,0 +1,63 @@
+# Trivy Operator: scans what actually runs in the application namespaces.
+#
+# For every workload it keeps a VulnerabilityReport (the running image's packages against
+# the vulnerability database), a ConfigAuditReport (the live Kubernetes objects against
+# Trivy's misconfiguration checks) and RBAC assessments, and exports them as Prometheus
+# metrics. It works offline: the vulnerability database and the checks bundle come from
+# Harbor's platform-tools project, which `sscp up --with ci` and `sscp tools refresh-db`
+# keep current.
+#
+# Trust in Harbor: the platform CA (ConfigMap `sscp-root-ca`) is mounted as one extra file
+# into /etc/ssl/certs, where Trivy's TLS library looks for trusted certificates next to the
+# public roots.
+targetNamespaces: commerce,commerce-data
+operator:
+  # One scan at a time keeps memory use flat on a workstation.
+  scanJobsConcurrentLimit: 1
+  vulnerabilityScannerEnabled: true
+  configAuditScannerEnabled: true
+  rbacAssessmentScannerEnabled: true
+  exposedSecretScannerEnabled: true
+  # SBOMs come from the build zone; node and compliance scans are out of scope here.
+  sbomGenerationEnabled: false
+  infraAssessmentScannerEnabled: false
+  clusterComplianceEnabled: false
+trivyOperator:
+  scanJobCustomVolumes:
+    - name: sscp-root-ca
+      configMap:
+        name: sscp-root-ca
+  scanJobCustomVolumesMount:
+    - name: sscp-root-ca
+      mountPath: /etc/ssl/certs/sscp-root-ca.crt
+      subPath: ca.crt
+      readOnly: true
+trivy:
+  dbRegistry: harbor.sscp.test:8443
+  dbRepository: platform-tools/trivy-db
+  skipJavaDBUpdate: true
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { memory: 768Mi }
+policiesBundle:
+  registry: harbor.sscp.test:8443
+  repository: platform-tools/trivy-checks
+  tag: "1"
+# The operator downloads the checks bundle itself. It keeps the chart's own /tmp cache
+# (required for the bundle) and gets the platform CA the same way as the scan jobs.
+volumes:
+  - name: cache-policies
+    emptyDir: {}
+  - name: sscp-root-ca
+    configMap:
+      name: sscp-root-ca
+volumeMounts:
+  - name: cache-policies
+    mountPath: /tmp
+  - name: sscp-root-ca
+    mountPath: /etc/ssl/certs/sscp-root-ca.crt
+    subPath: ca.crt
+    readOnly: true
+resources:
+  requests: { cpu: 20m, memory: 96Mi }
+  limits: { memory: 384Mi }

@@ -1,0 +1,123 @@
+# Prometheus alert rules: the platform's important security and health signals.
+#
+# Loaded by Prometheus from the `prometheus-rules` ConfigMap (generated from this file by
+# ../kustomization.yaml). There is no Alertmanager: firing alerts are visible in Prometheus
+# (127.0.0.1:9990/alerts) and on the Grafana dashboards.
+groups:
+  - name: supply-chain
+    rules:
+      - alert: TrustDecisionFailed
+        expr: sum by (scope) (increase(sscp_trust_decisions_total{outcome="Fail"}[30m])) > 0
+        labels: { severity: warning }
+        annotations:
+          summary: The Security Control Plane refused trust ({{ $labels.scope }}) in the last 30 minutes.
+      - alert: ScannerDidNotComplete
+        expr: sum by (kind) (increase(sscp_scanner_failures_total[1h])) > 0
+        labels: { severity: warning }
+        annotations:
+          summary: A {{ $labels.kind }} scanner failed to complete; its gate fails closed until it runs again.
+      # Rejection reasons are open-ended, so a reason can appear for the first time; its
+      # series then starts at 1 and `increase` alone would not see it (second part).
+      - alert: EvidenceRejected
+        expr: >-
+          sum by (reason) (increase(sscp_evidence_rejected_total[1h])) > 0
+          or sum by (reason) (sscp_evidence_rejected_total unless sscp_evidence_rejected_total offset 1h) > 0
+        labels: { severity: warning }
+        annotations:
+          summary: The Control Plane refused evidence ({{ $labels.reason }}).
+      - alert: PipelineFailed
+        expr: sum by (kind) (increase(sscp_builds_completed_total{status="failed"}[1h])) > 0
+        labels: { severity: warning }
+        annotations:
+          summary: A {{ $labels.kind }} pipeline finished without reaching a decision.
+      - alert: DeploymentDoesNotMatchRelease
+        expr: increase(sscp_deployments_total{result="mismatch"}[1h]) > 0
+        labels: { severity: critical }
+        annotations:
+          summary: A running GitOps revision does not pin the digests the Control Plane approved for its release.
+      - alert: RiskExceptionsExpiringSoon
+        expr: sum(sscp_exceptions_expiring_7d) > 0
+        labels: { severity: info }
+        annotations:
+          summary: "{{ $value }} approved risk exception(s) expire within seven days; the affected artifacts will be re-evaluated."
+
+  - name: deployment-security
+    rules:
+      # Kyverno counts every policy result; `fail` on an admission request is a refused
+      # create or update (an unsigned image, a privileged pod, a new exposure, ...).
+      - alert: AdmissionRefused
+        expr: sum by (policy_name, resource_namespace) (increase(kyverno_validating_policy_results_total{result="fail", execution_cause="admission_request"}[15m])) > 0
+        labels: { severity: warning }
+        annotations:
+          summary: Kyverno policy {{ $labels.policy_name }} refused a request in {{ $labels.resource_namespace }}.
+      - alert: GitOpsApplicationDegraded
+        expr: argocd_app_info{health_status=~"Degraded|Missing"} == 1
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: Argo CD application {{ $labels.name }} is {{ $labels.health_status }}.
+      # Automated sync with self-heal corrects drift within minutes; staying out of sync
+      # means Argo CD cannot apply what Git declares (refused admission, invalid manifest).
+      - alert: GitOpsApplicationOutOfSync
+        expr: argocd_app_info{sync_status="OutOfSync"} == 1
+        for: 15m
+        labels: { severity: warning }
+        annotations:
+          summary: Argo CD application {{ $labels.name }} has not matched Git for 15 minutes.
+      - alert: SecretDeliveryFailing
+        expr: externalsecret_status_condition{condition="Ready", status="False"} == 1
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: External Secrets cannot deliver {{ $labels.namespace }}/{{ $labels.name }} from Vault.
+
+  - name: runtime-vulnerabilities
+    rules:
+      # Trivy Operator rescans running images with the offline database mirrored in Harbor,
+      # so a vulnerability published after the release was approved still shows up here.
+      - alert: RunningImageHasCriticalVulnerabilities
+        expr: sum by (namespace, resource_name, image_repository) (trivy_image_vulnerabilities{severity="Critical", namespace=~"commerce|commerce-data"}) > 0
+        labels: { severity: warning }
+        annotations:
+          summary: "{{ $labels.namespace }}/{{ $labels.resource_name }} runs {{ $labels.image_repository }} with {{ $value }} critical vulnerabilities."
+      # Release images passed the secret scan in CI, so a finding here means that gate
+      # missed something. The mirrored third-party images in commerce-data are shown on
+      # the dashboard instead (postgres ships Debian's unused snakeoil TLS key).
+      - alert: RunningImageContainsSecrets
+        expr: sum by (namespace, resource_name, image_repository) (trivy_image_exposedsecrets{namespace="commerce"}) > 0
+        labels: { severity: critical }
+        annotations:
+          summary: "{{ $labels.namespace }}/{{ $labels.resource_name }} runs an image with embedded secrets ({{ $labels.image_repository }})."
+
+  - name: workload-security
+    rules:
+      - alert: TamperedIntegrationMessages
+        expr: sum by (service_name) (increase(commerce_security_events_total{type="integration.message_rejected"}[15m])) > 0
+        labels: { severity: critical }
+        annotations:
+          summary: "{{ $labels.service_name }} rejected integration messages with an invalid or untrusted signature."
+      - alert: AuthorizationDenialsSpike
+        expr: sum by (service_name) (increase(commerce_security_events_total{type="authorization.denied"}[10m])) > 20
+        labels: { severity: warning }
+        annotations:
+          summary: "{{ $labels.service_name }} denied more than 20 requests in 10 minutes."
+      - alert: AuthenticationFailuresSpike
+        expr: sum by (service_name) (increase(commerce_security_events_total{type="authentication.failed"}[10m])) > 20
+        labels: { severity: warning }
+        annotations:
+          summary: "{{ $labels.service_name }} saw more than 20 failed authentications in 10 minutes."
+
+  - name: platform-health
+    rules:
+      - alert: ComponentUnreachable
+        expr: up == 0
+        for: 5m
+        labels: { severity: critical }
+        annotations:
+          summary: Prometheus cannot scrape {{ $labels.job }} ({{ $labels.instance }}).
+      - alert: VaultSealed
+        expr: vault_core_unsealed == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          summary: Vault is sealed; secrets, signing grants and secret delivery stop until `sscp up` unseals it.

@@ -1,0 +1,91 @@
+# OpenTelemetry Collector configuration: receivers, processing and where each signal goes.
+# Packed into the `otel-collector` ConfigMap by ../../kustomization.yaml; a change here restarts the pod.
+receivers:
+  otlp:
+    protocols:
+      grpc: { endpoint: 0.0.0.0:4317 }
+      http: { endpoint: 0.0.0.0:4318 }
+  # Kubernetes events of the namespaces where admission, deployment and secret
+  # delivery happen.
+  k8s_objects:
+    auth_type: serviceAccount
+    objects:
+      - name: events
+        mode: watch
+        namespaces: [commerce, commerce-data, argocd, kyverno, external-secrets]
+processors:
+  # Refuses new data (senders retry) before the container reaches its memory limit,
+  # measured against the container's own limit so the two cannot drift apart.
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 80
+    spike_limit_percentage: 20
+  k8s_attributes:
+    auth_type: serviceAccount
+    passthrough: false
+    pod_association:
+      - sources: [{ from: connection }]
+    extract:
+      metadata:
+        - k8s.namespace.name
+        - k8s.pod.name
+        - k8s.deployment.name
+        - container.image.name
+        - container.image.repo_digests
+  # Kubernetes events have no sending service; this name makes them one Loki stream
+  # set: {service_name="kubernetes-events"}.
+  resource/events:
+    attributes:
+      - { key: service.name, value: kubernetes-events, action: upsert }
+  batch: {}
+connectors:
+  span_metrics:
+    histogram:
+      explicit:
+        buckets: [5ms, 25ms, 100ms, 250ms, 1s, 5s]
+    dimensions:
+      - name: http.route
+      - name: http.response.status_code
+exporters:
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    # These resource attributes become metric labels, so every workload metric says
+    # which service, release, namespace, pod and image produced it. Only these: every
+    # other attribute (process, SDK, host) would only multiply the number of series.
+    resource_constant_labels:
+      included:
+        - service.name
+        - service.version
+        - sscp.release.*
+        - deployment.environment.name
+        - k8s.namespace.name
+        - k8s.deployment.name
+        - k8s.pod.name
+        - container.image.name
+  otlp_http/loki:
+    endpoint: http://loki.observability.svc.cluster.local:3100/otlp
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+service:
+  extensions: [health_check]
+  telemetry:
+    metrics:
+      level: basic
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, k8s_attributes, batch]
+      exporters: [span_metrics]
+    metrics:
+      receivers: [otlp, span_metrics]
+      processors: [memory_limiter, k8s_attributes, batch]
+      exporters: [prometheus]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, k8s_attributes, batch]
+      exporters: [otlp_http/loki]
+    logs/events:
+      receivers: [k8s_objects]
+      processors: [memory_limiter, resource/events, batch]
+      exporters: [otlp_http/loki]

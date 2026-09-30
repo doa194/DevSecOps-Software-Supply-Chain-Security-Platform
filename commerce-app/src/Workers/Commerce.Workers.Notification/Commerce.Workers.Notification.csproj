@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="../../BuildingBlocks/Commerce.BuildingBlocks/Commerce.BuildingBlocks.csproj" />
+    <ProjectReference Include="../../Modules/Orders/Commerce.Modules.Orders.Contracts/Commerce.Modules.Orders.Contracts.csproj" />
+    <ProjectReference Include="../../Modules/Payments/Commerce.Modules.Payments.Contracts/Commerce.Modules.Payments.Contracts.csproj" />
+    <ProjectReference Include="../../Modules/Customers/Commerce.Modules.Customers.Contracts/Commerce.Modules.Customers.Contracts.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

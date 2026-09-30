@@ -1,0 +1,70 @@
+# Argo CD projects and the commerce application.
+#
+# `commerce` project: deploys only from the GitOps repository, only into the `commerce`
+# and `commerce-data` namespaces, and only the kinds a workload needs. It cannot create
+# cluster-wide resources, Secrets, RBAC, network policies, service accounts or secret
+# stores, so a GitOps change cannot weaken the platform's controls.
+#
+# `default` project: emptied, so no Application can bypass the two projects above.
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: commerce
+  namespace: argocd
+spec:
+  description: The commerce workload, from platform/commerce-gitops
+  sourceRepos:
+    - https://gitea.sscp.test:3000/platform/commerce-gitops.git
+  destinations:
+    - { server: https://kubernetes.default.svc, namespace: commerce }
+    - { server: https://kubernetes.default.svc, namespace: commerce-data }
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - { group: apps, kind: Deployment }
+    - { group: apps, kind: StatefulSet }
+    - { group: batch, kind: Job }
+    - { group: "", kind: Service }
+    - { group: "", kind: ConfigMap }
+    - { group: external-secrets.io, kind: ExternalSecret }
+    - { group: policy, kind: PodDisruptionBudget }
+  orphanedResources:
+    warn: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: default
+  namespace: argocd
+spec:
+  description: Unused; every application belongs to the platform or commerce project
+  sourceRepos: []
+  destinations: []
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist: []
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: commerce
+  namespace: argocd
+  annotations:
+    # Report each healthy deployment of a new revision to the Security Control Plane.
+    notifications.argoproj.io/subscribe.on-deployed.controlplane: ""
+spec:
+  project: commerce
+  source:
+    repoURL: https://gitea.sscp.test:3000/platform/commerce-gitops.git
+    targetRevision: main
+    path: overlays/local
+  destination:
+    server: https://kubernetes.default.svc
+    # Default for resources without a namespace; the manifests name theirs explicitly.
+    namespace: commerce
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff: { duration: 20s, factor: 2, maxDuration: 5m }

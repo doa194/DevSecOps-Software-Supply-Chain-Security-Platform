@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="TngTech.ArchUnitNET.xUnitV3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Hosts/Commerce.Api/Commerce.Api.csproj" />
+    <ProjectReference Include="../../src/Hosts/Commerce.Gateway/Commerce.Gateway.csproj" />
+    <ProjectReference Include="../../src/Workers/Commerce.Workers.Notification/Commerce.Workers.Notification.csproj" />
+    <ProjectReference Include="../../src/Workers/Commerce.Workers.Audit/Commerce.Workers.Audit.csproj" />
+    <ProjectReference Include="../../src/Workers/Commerce.Workers.Documents/Commerce.Workers.Documents.csproj" />
+    <ProjectReference Include="../../src/Workers/Commerce.Workers.Reporting/Commerce.Workers.Reporting.csproj" />
+  </ItemGroup>
+</Project>

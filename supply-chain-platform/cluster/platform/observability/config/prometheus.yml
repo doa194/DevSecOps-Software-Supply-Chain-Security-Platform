@@ -1,0 +1,46 @@
+# Prometheus configuration: scrape targets in the cluster and in the software factory.
+# Packed into the `prometheus` ConfigMap by ../../kustomization.yaml; a change here restarts the pod.
+global:
+  scrape_interval: 30s
+  # The default of 10 seconds is too short on a busy workstation (see
+  # docs/production-considerations.md).
+  scrape_timeout: 20s
+  evaluation_interval: 30s
+rule_files:
+  - /etc/prometheus/rules/*.yaml
+scrape_configs:
+  - job_name: prometheus
+    static_configs: [{ targets: ["localhost:9090"] }]
+  # Workload metrics, converted from OTLP by the collector.
+  - job_name: workload
+    honor_labels: true
+    static_configs: [{ targets: ["otel-collector.observability.svc.cluster.local:8889"] }]
+  - job_name: kyverno
+    static_configs:
+      - targets:
+          - kyverno-svc-metrics.kyverno.svc.cluster.local:8000
+          - kyverno-reports-controller-metrics.kyverno.svc.cluster.local:8000
+  - job_name: argocd
+    static_configs: [{ targets: ["argocd-application-controller-metrics.argocd.svc.cluster.local:8082"] }]
+  - job_name: external-secrets
+    static_configs: [{ targets: ["external-secrets-metrics.external-secrets.svc.cluster.local:8080"] }]
+  # Headless service: the name resolves to the operator pod, which serves on 8080.
+  - job_name: trivy-operator
+    static_configs: [{ targets: ["trivy-operator.trivy-system.svc.cluster.local:8080"] }]
+  # Software factory over sscp-edge.
+  - job_name: controlplane
+    static_configs: [{ targets: ["controlplane.sscp.test:9464"] }]
+  - job_name: harbor
+    static_configs: [{ targets: ["harbor.sscp.test:9090"] }]
+  - job_name: vault
+    scheme: https
+    metrics_path: /v1/sys/metrics
+    params: { format: [prometheus] }
+    tls_config: { ca_file: /etc/sscp/ca.crt }
+    static_configs: [{ targets: ["vault.sscp.test:8200"] }]
+  - job_name: gitea
+    scheme: https
+    tls_config: { ca_file: /etc/sscp/ca.crt }
+    authorization:
+      credentials_file: /etc/prometheus/secrets/token
+    static_configs: [{ targets: ["gitea.sscp.test:3000"] }]

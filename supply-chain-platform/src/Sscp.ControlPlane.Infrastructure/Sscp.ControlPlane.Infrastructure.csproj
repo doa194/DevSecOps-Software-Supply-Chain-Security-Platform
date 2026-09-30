@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Adapters for the outside world: PostgreSQL, the MinIO evidence store, Gitea and Vault. -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../Sscp.ControlPlane.Application/Sscp.ControlPlane.Application.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="AWSSDK.S3" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
+    <PackageReference Include="EFCore.NamingConventions" />
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
+</Project>

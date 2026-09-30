@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Tests against real, disposable infrastructure (Testcontainers): PostgreSQL, RabbitMQ,
+       Keycloak and MinIO. They need a Docker daemon. -->
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Testcontainers.RabbitMq" />
+    <PackageReference Include="Testcontainers.Keycloak" />
+    <PackageReference Include="Testcontainers.Minio" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Hosts/Commerce.Api/Commerce.Api.csproj" />
+    <ProjectReference Include="../../src/Workers/Commerce.Workers.Audit/Commerce.Workers.Audit.csproj" />
+    <ProjectReference Include="../../src/Workers/Commerce.Workers.Reporting/Commerce.Workers.Reporting.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Keycloak/commerce-test-realm.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

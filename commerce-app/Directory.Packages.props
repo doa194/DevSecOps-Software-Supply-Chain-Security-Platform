@@ -1,0 +1,47 @@
+<Project>
+  <!-- Central package versions: projects reference packages without a version, so one
+       reviewed change updates a dependency everywhere. Lock files pin the full graph. -->
+  <ItemGroup>
+    <!-- Persistence and infrastructure clients -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageVersion Include="EFCore.NamingConventions" Version="10.0.1" />
+    <PackageVersion Include="Npgsql" Version="10.0.3" />
+    <PackageVersion Include="Npgsql.OpenTelemetry" Version="10.0.3" />
+    <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
+    <PackageVersion Include="StackExchange.Redis" Version="3.3.1" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.12" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.103.4" />
+    <!-- Web, identity and gateway -->
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+    <PackageVersion Include="Yarp.ReverseProxy" Version="2.3.0" />
+    <PackageVersion Include="FluentValidation" Version="12.1.1" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageVersion Include="Microsoft.FeatureManagement.AspNetCore" Version="4.8.0" />
+    <!-- Telemetry, data classification and redaction -->
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.19.1" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.19.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.19.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.19.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.19.0" />
+    <PackageVersion Include="Microsoft.Extensions.Compliance.Abstractions" Version="10.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.Compliance.Redaction" Version="10.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.Telemetry" Version="10.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.12" />
+    <!-- Test-only packages -->
+    <PackageVersion Include="xunit.v3" Version="4.0.1" />
+    <PackageVersion Include="TngTech.ArchUnitNET.xUnitV3" Version="0.13.4" />
+    <PackageVersion Include="AwesomeAssertions" Version="9.6.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.10.0" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.15.0" />
+    <PackageVersion Include="Testcontainers.RabbitMq" Version="4.15.0" />
+    <PackageVersion Include="Testcontainers.Redis" Version="4.15.0" />
+    <PackageVersion Include="Testcontainers.Keycloak" Version="4.15.0" />
+    <PackageVersion Include="Testcontainers.Minio" Version="4.15.0" />
+  </ItemGroup>
+</Project>

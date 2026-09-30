@@ -1,0 +1,42 @@
+<Project>
+  <!-- Build settings shared by every .NET project in the commerce workload. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <!-- Known-vulnerable packages are reported during restore but do not break the build:
+         the vulnerability gate belongs to the Security Control Plane (Trivy evidence), so a
+         vulnerable dependency still produces a candidate that the gate can reject visibly. -->
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <WarningsNotAsErrors>NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- Lock files record the exact version and content hash of every package. CI restores
+         in locked mode, so a changed or substituted package fails the build. -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode Condition="'$(CI)' == 'true'">true</RestoreLockedMode>
+    <!-- Reproducible build settings: deterministic output and normalized source paths. -->
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <!-- CA1515 (make types internal) does not fit a modular monolith whose modules
+         expose registration types to the host. CA1848 (LoggerMessage delegates) is
+         replaced by source-generated logging where logging is hot. -->
+    <NoWarn>$(NoWarn);CA1515;CA1848;CA1716;CA1711;CA1724</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <OutputType>Exe</OutputType>
+    <!-- Test naming uses underscores for readability. -->
+    <NoWarn>$(NoWarn);CA1707;CA2007;CA1861;CA1062;CA1819;CA1307;CA1310;CA2000;xUnit1051</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>

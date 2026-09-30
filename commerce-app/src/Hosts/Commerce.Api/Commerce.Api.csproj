@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="../../BuildingBlocks/Commerce.BuildingBlocks/Commerce.BuildingBlocks.csproj" />
+    <ProjectReference Include="../../Modules/Identity/Commerce.Modules.Identity/Commerce.Modules.Identity.csproj" />
+    <ProjectReference Include="../../Modules/Customers/Commerce.Modules.Customers/Commerce.Modules.Customers.csproj" />
+    <ProjectReference Include="../../Modules/Catalog/Commerce.Modules.Catalog/Commerce.Modules.Catalog.csproj" />
+    <ProjectReference Include="../../Modules/Inventory/Commerce.Modules.Inventory/Commerce.Modules.Inventory.csproj" />
+    <ProjectReference Include="../../Modules/Orders/Commerce.Modules.Orders/Commerce.Modules.Orders.csproj" />
+    <ProjectReference Include="../../Modules/Payments/Commerce.Modules.Payments/Commerce.Modules.Payments.csproj" />
+    <ProjectReference Include="../../Modules/Documents/Commerce.Modules.Documents/Commerce.Modules.Documents.csproj" />
+    <ProjectReference Include="../../Modules/Administration/Commerce.Modules.Administration/Commerce.Modules.Administration.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+  </ItemGroup>
+</Project>

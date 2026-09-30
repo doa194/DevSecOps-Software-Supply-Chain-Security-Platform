@@ -1,0 +1,37 @@
+# Python automation for the platform: the `sscp` command bootstraps, verifies, demonstrates
+# and tears down the local software factory and cluster. The CI helper package used inside
+# the platform-owned pipelines lives in ci/ and has its own dependencies.
+[project]
+name = "sscp-automation"
+version = "1.0.0"
+description = "Bootstrap, verification and demo automation for the Software Supply Chain Security Platform"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28",
+    "pyyaml>=6.0.2",
+    "cryptography>=45",
+]
+
+[project.scripts]
+sscp = "sscp.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8.4"]
+
+[build-system]
+requires = ["uv_build>=0.12,<0.13"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = "automation/src"
+module-name = "sscp"
+
+[tool.pytest.ini_options]
+testpaths = ["automation/tests", "ci/tests"]
+# The CI helper package (ci/sscp_ci) is tested from here too; it ships in the ci-tools image.
+pythonpath = ["ci"]
+markers = [
+    "operational: needs the running platform (Docker Compose services and/or the kind cluster)",
+]
+# Unit tests run by default; operational suites are selected explicitly (`sscp verify`).
+addopts = "-m 'not operational'"

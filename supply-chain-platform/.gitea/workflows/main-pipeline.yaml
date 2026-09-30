@@ -1,0 +1,89 @@
+# Main-branch pipeline: build once, collect all evidence, get the trust decision.
+#
+# Platform-owned and started only by the Security Control Plane (workflow_dispatch) when a
+# commit reaches main in an application repository. Jobs run in the zone their work
+# belongs to:
+#   security zone  source scans and code quality, then vulnerability scans of the images,
+#                  then dynamic tests (authorization suite and ZAP) against the candidates
+#                  running in a throw-away security-test environment
+#   build zone     builds each registered deployable once, pushes it to the candidates
+#                  project, registers its digest and submits its SBOM
+# Every result is a raw report handed to the Control Plane, which alone decides and sets
+# the `sscp/trust-decision` status on the commit.
+name: main-pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_id: { description: Control Plane build id, required: true }
+      application: { description: Registered application, required: true }
+      repository: { description: Source repository (owner/name), required: true }
+      commit: { description: Commit on main, required: true }
+
+env:
+  BUILD_ID: ${{ inputs.build_id }}
+  REPOSITORY: ${{ inputs.repository }}
+  COMMIT: ${{ inputs.commit }}
+
+jobs:
+  source-security:
+    runs-on: sscp-security
+    timeout-minutes: 45
+    steps:
+      - name: Fetch the commit
+        run: sscp-ci fetch-source --repository "$REPOSITORY" --commit "$COMMIT" --dest src
+      - name: Secrets (Gitleaks)
+        run: sscp-ci scan secrets --build "$BUILD_ID" --commit "$COMMIT"
+      - name: Static analysis (Semgrep, platform rules)
+        run: sscp-ci scan sast --build "$BUILD_ID" --commit "$COMMIT"
+      - name: Infrastructure as code (Checkov)
+        run: sscp-ci scan iac --build "$BUILD_ID" --commit "$COMMIT"
+      - name: Dockerfile (Hadolint)
+        run: sscp-ci scan dockerfile --build "$BUILD_ID" --commit "$COMMIT"
+      - name: Code quality (SonarQube)
+        run: sscp-ci quality --build "$BUILD_ID" --commit "$COMMIT"
+
+  build:
+    runs-on: sscp-build
+    timeout-minutes: 45
+    steps:
+      - name: Fetch the commit
+        run: sscp-ci fetch-source --repository "$REPOSITORY" --commit "$COMMIT" --dest src
+      - name: Base-image policy
+        run: sscp-ci check-dockerfile --src src
+      - name: Build, push, register and SBOM every deployable
+        run: sscp-ci build-images --build "$BUILD_ID" --commit "$COMMIT"
+
+  artifact-security:
+    needs: build
+    runs-on: sscp-security
+    timeout-minutes: 45
+    steps:
+      - name: Vulnerability scans of every candidate (Trivy, Grype)
+        run: sscp-ci scan-images --build "$BUILD_ID" --commit "$COMMIT"
+
+  dynamic-security:
+    needs: [build, artifact-security]
+    runs-on: sscp-security
+    timeout-minutes: 45
+    steps:
+      - name: Fetch the commit (for the workload's trusted-publisher list)
+        run: sscp-ci fetch-source --repository "$REPOSITORY" --commit "$COMMIT" --dest src
+      - name: Authorization suite and authenticated ZAP scan against the candidates
+        run: sscp-ci dynamic --build "$BUILD_ID" --commit "$COMMIT"
+
+  decision:
+    needs: [source-security, build, artifact-security, dynamic-security]
+    if: always()
+    runs-on: sscp-security
+    timeout-minutes: 10
+    steps:
+      - name: Trust decision (Control Plane)
+        if: needs.build.result == 'success'
+        run: sscp-ci evaluate-build --build "$BUILD_ID"
+      - name: Mark the build finished
+        if: always()
+        run: >-
+          sscp-ci complete --build "$BUILD_ID"
+          --status "${{ (needs.source-security.result == 'success' && needs.build.result == 'success' && needs.artifact-security.result == 'success' && needs.dynamic-security.result == 'success') && 'success' || 'failure' }}"
+          --reason "source-security=${{ needs.source-security.result }} build=${{ needs.build.result }} artifact-security=${{ needs.artifact-security.result }} dynamic-security=${{ needs.dynamic-security.result }}"

@@ -1,0 +1,133 @@
+# Platform-owned Semgrep rules for .NET services.
+#
+# The security zone runs Semgrep with these rules only (no registry download, no network).
+# Severity mapping in the Control Plane: ERROR -> High (blocks), WARNING -> Medium (reported),
+# INFO -> Low. Test code is excluded: it is never shipped.
+#
+# Each rule is exercised by dotnet-security.cs (`semgrep --test`): `ruleid:` lines must
+# match, `ok:` lines must not.
+#
+# Inline `nosemgrep` comments are ignored (the pipeline runs with --disable-nosem): code
+# authors do not decide which findings count. Accepted risk goes through a time-limited
+# risk exception in the Control Plane; a false-positive pattern is fixed here, in review.
+rules:
+  - id: sscp.dotnet.raw-sql-from-non-constant
+    languages: [csharp]
+    severity: ERROR
+    message: >-
+      SQL text is built at run time and passed to a raw SQL API. Use the parameterised
+      forms (FromSql / ExecuteSql with an interpolated FormattableString) so values are
+      sent as parameters, not as SQL.
+    metadata: { cwe: "CWE-89: SQL Injection", owasp: "A03:2021 Injection", category: security }
+    paths: { exclude: ["tests/**"] }
+    patterns:
+      - pattern-either:
+          - pattern: $DB.ExecuteSqlRaw($SQL, ...)
+          - pattern: $DB.ExecuteSqlRawAsync($SQL, ...)
+          - pattern: $SET.FromSqlRaw($SQL, ...)
+          - pattern: $DB.SqlQueryRaw<$T>($SQL, ...)
+          - pattern: new NpgsqlCommand($SQL, ...)
+      - metavariable-pattern:
+          metavariable: $SQL
+          patterns:
+            - pattern-not: '"..."'
+      # Reviewed safe construct: statements from PrivilegeStatements embed only
+      # SqlIdentifier values, which are validated against a strict pattern.
+      - pattern-not-inside: |
+          foreach (var $S in PrivilegeStatements.$METHOD(...)) { ... }
+
+  - id: sscp.dotnet.insecure-deserialization
+    languages: [csharp]
+    severity: ERROR
+    message: >-
+      This deserializer can instantiate arbitrary types from untrusted input. Use
+      System.Text.Json with known types.
+    metadata: { cwe: "CWE-502: Deserialization of Untrusted Data", owasp: "A08:2021 Software and Data Integrity Failures", category: security }
+    paths: { exclude: ["tests/**"] }
+    pattern-either:
+      - pattern: new BinaryFormatter()
+      - pattern: new NetDataContractSerializer(...)
+      - pattern: new LosFormatter(...)
+      - pattern: TypeNameHandling.All
+      - pattern: TypeNameHandling.Auto
+      - pattern: TypeNameHandling.Objects
+      - pattern: TypeNameHandling.Arrays
+
+  - id: sscp.dotnet.tls-validation-disabled
+    languages: [csharp]
+    severity: ERROR
+    message: >-
+      Certificate validation is turned off. Trust a specific CA instead (see
+      LocalCaTrust); never accept every certificate.
+    metadata: { cwe: "CWE-295: Improper Certificate Validation", owasp: "A07:2021 Identification and Authentication Failures", category: security }
+    paths: { exclude: ["tests/**"] }
+    pattern-either:
+      - pattern: HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+      - pattern: $H.ServerCertificateCustomValidationCallback = ($A, $B, $C, $D) => true
+      - pattern: $H.RemoteCertificateValidationCallback = ($A, $B, $C, $D) => true
+
+  - id: sscp.dotnet.token-validation-weakened
+    languages: [csharp]
+    severity: ERROR
+    message: >-
+      A JWT validation check is switched off. Tokens must be validated for issuer,
+      audience, lifetime and signature.
+    metadata: { cwe: "CWE-347: Improper Verification of Cryptographic Signature", owasp: "A07:2021 Identification and Authentication Failures", category: security }
+    paths: { exclude: ["tests/**"] }
+    pattern-either:
+      - pattern: "ValidateIssuer = false"
+      - pattern: "ValidateAudience = false"
+      - pattern: "ValidateLifetime = false"
+      - pattern: "ValidateIssuerSigningKey = false"
+      - pattern: "RequireSignedTokens = false"
+      - pattern: "RequireExpirationTime = false"
+
+  - id: sscp.dotnet.weak-hash
+    languages: [csharp]
+    severity: WARNING
+    message: >-
+      MD5 and SHA-1 are broken for security purposes. Use SHA-256 or stronger.
+    metadata: { cwe: "CWE-328: Use of Weak Hash", owasp: "A02:2021 Cryptographic Failures", category: security }
+    paths: { exclude: ["tests/**"] }
+    pattern-either:
+      - pattern: MD5.Create(...)
+      - pattern: MD5.HashData(...)
+      - pattern: SHA1.Create(...)
+      - pattern: SHA1.HashData(...)
+      - pattern: new MD5CryptoServiceProvider()
+      - pattern: new SHA1CryptoServiceProvider()
+
+  - id: sscp.dotnet.sensitive-data-logging
+    languages: [csharp]
+    severity: WARNING
+    message: >-
+      EF Core sensitive data logging writes parameter values (personal data, secrets) to
+      logs. Keep it out of service code.
+    metadata: { cwe: "CWE-532: Insertion of Sensitive Information into Log File", category: security }
+    paths: { exclude: ["tests/**"] }
+    pattern: $OPTIONS.EnableSensitiveDataLogging(...)
+
+  - id: sscp.dotnet.process-start-non-constant
+    languages: [csharp]
+    severity: WARNING
+    message: >-
+      A process is started with a command built at run time. Services must not run
+      external programs; if unavoidable, use a fixed executable and argument list.
+    metadata: { cwe: "CWE-78: OS Command Injection", owasp: "A03:2021 Injection", category: security }
+    paths: { exclude: ["tests/**"] }
+    patterns:
+      - pattern: Process.Start($CMD, ...)
+      - metavariable-pattern:
+          metavariable: $CMD
+          patterns:
+            - pattern-not: '"..."'
+
+  - id: sscp.dotnet.anonymous-endpoint
+    languages: [csharp]
+    severity: INFO
+    message: >-
+      Endpoint opts out of authentication. Anonymous endpoints must be on the gateway's
+      allow-list and reviewed.
+    metadata: { cwe: "CWE-306: Missing Authentication for Critical Function", category: security }
+    paths: { exclude: ["tests/**"] }
+    pattern: $ENDPOINT.AllowAnonymous()

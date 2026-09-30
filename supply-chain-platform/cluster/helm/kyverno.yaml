@@ -1,0 +1,31 @@
+# Kyverno: admission control for the application namespaces.
+#
+# The policies themselves live in cluster/platform/policies and reach the cluster through
+# Argo CD's `platform` project. The platform CA is added by the bootstrap
+# (`--set-file global.caCertificates.data=...`) so Kyverno can read signatures and
+# attestations from Harbor over verified TLS.
+admissionController:
+  replicas: 1
+  container:
+    resources:
+      requests: { cpu: 50m, memory: 128Mi }
+      limits: { memory: 512Mi }
+# Reports feed the policy dashboards and `kubectl get policyreports`.
+reportsController:
+  enabled: true
+  resources:
+    requests: { cpu: 20m, memory: 64Mi }
+    limits: { memory: 256Mi }
+# Not used: the platform has no generate, mutate-existing or cleanup policies.
+backgroundController:
+  enabled: false
+cleanupController:
+  enabled: false
+config:
+  # kube-system and Kyverno's own namespace are never sent to the webhooks.
+  webhooks:
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values: [kube-system]

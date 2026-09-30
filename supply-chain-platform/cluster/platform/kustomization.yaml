@@ -1,0 +1,60 @@
+# Cluster security state owned by the platform team. Argo CD's `platform-cluster`
+# application keeps the cluster in line with this directory on the platform repository's
+# main branch (see ../bootstrap/).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespaces.yaml
+  - service-accounts.yaml
+  - secret-stores.yaml
+  - platform-secrets.yaml
+  - network-policies.yaml
+  - exposure.yaml
+  - policies/verify-commerce-images.yaml
+  - policies/restrict-image-sources.yaml
+  - policies/workload-security.yaml
+  - policies/workload-operability.yaml
+  - policies/restrict-secret-writers.yaml
+  - policies/restrict-service-exposure.yaml
+  - policies/no-ephemeral-containers.yaml
+  - argocd.yaml
+  - observability/secrets.yaml
+  - observability/otel-collector.yaml
+  - observability/loki.yaml
+  - observability/prometheus.yaml
+  - observability/grafana.yaml
+# Configuration, alert rules and dashboards of the observability stack are kept as plain
+# files and packed into ConfigMaps here. The generated names carry a content hash, so a
+# change to any of them rolls out the component that reads it.
+generatorOptions:
+  annotations:
+    # This application never prunes on its own, so superseded copies (older hashes) stay
+    # behind until someone deletes them; Argo CD ignores them when comparing with Git.
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+configMapGenerator:
+  - name: otel-collector
+    namespace: observability
+    files:
+      - config.yaml=observability/config/otel-collector.yaml
+  - name: loki
+    namespace: observability
+    files:
+      - config.yaml=observability/config/loki.yaml
+  - name: prometheus
+    namespace: observability
+    files:
+      - prometheus.yml=observability/config/prometheus.yml
+  - name: grafana-provisioning
+    namespace: observability
+    files:
+      - datasources.yaml=observability/config/grafana-datasources.yaml
+      - dashboards.yaml=observability/config/grafana-dashboards.yaml
+  - name: prometheus-rules
+    namespace: observability
+    files:
+      - observability/alerts.yaml
+  - name: grafana-dashboards
+    namespace: observability
+    files:
+      - observability/dashboards/sscp-supply-chain.json
+      - observability/dashboards/sscp-runtime.json
